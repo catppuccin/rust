@@ -28,7 +28,7 @@
 //! ```
 //!
 //! More examples can be found
-//! [here](https://github.com/catppuccin/palette/tree/main/rust/examples).
+//! [here](https://github.com/catppuccin/rust/tree/main/examples).
 //!
 //! Clone the repository to run them locally:
 //!
@@ -36,13 +36,13 @@
 //! $ cargo run --example simple
 //! ```
 //!
-//! ![Output from simple example](https://raw.githubusercontent.com/catppuccin/palette/main/rust/assets/simple-example.png)
+//! ![Output from simple example](https://raw.githubusercontent.com/catppuccin/rust/main/assets/simple-example.png)
 //!
 //! ```bash
 //! $ cargo run --features ansi --example term
 //! ```
 //!
-//! ![Output from term example](https://raw.githubusercontent.com/catppuccin/palette/main/rust/assets/term-example.png)
+//! ![Output from term example](https://raw.githubusercontent.com/catppuccin/rust/main/assets/term-example.png)
 //!
 //! # Optional Features
 //!
