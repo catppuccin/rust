@@ -1,0 +1,37 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/**"
+      - "Cargo.toml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "Cargo.toml"
+
+jobs:
+  compile:
+    runs-on: ubuntu-22.04
+    env:
+      RUST_BACKTRACE: 1
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --all-features --verbose
+      - run: cargo test --all-features --verbose
+
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt
+      - run: cargo fmt --all --check
