@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-	<img src="assets/ferris.webp"/>
+	<img src="https://raw.githubusercontent.com/catppuccin/rust/main/assets/ferris.webp"/>
 </p>
 
 ## Usage
