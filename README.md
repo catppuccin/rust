@@ -21,7 +21,7 @@ Add Catppuccin to your project's `Cargo.toml`:
 
 ```toml
 [dependencies]
-catppuccin = "1.0.4"
+catppuccin = "1.1.1"
 ```
 
 ## Example
