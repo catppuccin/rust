@@ -21,6 +21,17 @@ impl Colour {
     }
 }
 
+#[cfg(feature = "css")]
+impl From<Colour> for css_colors::RGB {
+    fn from(value: Colour) -> Self {
+        return Self {
+            r: css_colors::Ratio::from_u8(value.0),
+            g: css_colors::Ratio::from_u8(value.1),
+            b: css_colors::Ratio::from_u8(value.2),
+        };
+    }
+}
+
 #[cfg(feature = "ansi")]
 impl Colour {
     /// Paints the given input with the colour à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)

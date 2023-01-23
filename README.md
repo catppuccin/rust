@@ -19,15 +19,14 @@
 
 Add Catppuccin to your project's `Cargo.toml`:
 
-```toml
-[dependencies]
-catppuccin = "1.1.1"
+```bash
+$ cargo add catppuccin
 ```
 
 ## Example
 
 ```rust
-use catppuccin::MOCHA;
+use catppuccin::Flavour;
 
 struct Button {
     text: String,
@@ -37,7 +36,7 @@ struct Button {
 fn confirm(text: String) -> Button {
     Button {
         text,
-        background_colour: MOCHA.green.hex(),
+        background_colour: Flavour::Mocha.green().hex(),
     }
 }
 ```
@@ -67,6 +66,11 @@ Enable the `ansi` feature to add the
 [`Colour::ansi_paint`](crate::Colour::ansi_paint) method.
 This adds [ansi-term](https://crates.io/crates/ansi_term) as a dependency.
 
+### CSS colours
+
+Enable the `css` feature to allow the conversion of Catppuccin colours to
+[`css_colors::RGB`](css_colors::RGB).
+This adds [css-colors](https://crates.io/crates/css-colors) as a dependency.
 
 ## 💝 Thanks to
 
