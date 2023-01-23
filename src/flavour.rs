@@ -1,5 +1,6 @@
 use crate::{Colour, FlavourColours};
 
+/// One of the four Catppuccin flavours; Latte, Frappé, Macchiato, or Mocha.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Flavour {
     Latte,
@@ -24,6 +25,7 @@ macro_rules! impl_colour_method {
 }
 
 impl Flavour {
+    /// Returns the name of the flavour in lowercase.
     pub fn name(self) -> &'static str {
         match self {
             Self::Latte => "latte",
@@ -32,12 +34,6 @@ impl Flavour {
             Self::Mocha => "mocha",
         }
     }
-
-    impl_colour_method!(
-        rosewater, flamingo, pink, mauve, red, maroon, peach, yellow, green, teal, sky, sapphire,
-        blue, lavender, text, subtext1, subtext0, overlay2, overlay1, overlay0, surface2, surface1,
-        surface0, base, mantle, crust,
-    );
 
     pub fn colours(self) -> FlavourColours {
         match self {
@@ -155,11 +151,27 @@ impl Flavour {
             },
         }
     }
+
     /// Returns an iterator over the four delicious Catppuccin flavours.
     pub fn into_iter() -> std::array::IntoIter<Flavour, 4> {
         [Self::Latte, Self::Frappe, Self::Macchiato, Self::Mocha].into_iter()
     }
 }
+
+/// Convenience methods for directly accessing a colour from the flavour.
+/// ```rust
+/// use catppuccin::Flavour;
+///
+/// assert_eq!(Flavour::Mocha.teal(), Flavour::Mocha.colours().teal);
+/// ```
+impl Flavour {
+    impl_colour_method!(
+        rosewater, flamingo, pink, mauve, red, maroon, peach, yellow, green, teal, sky, sapphire,
+        blue, lavender, text, subtext1, subtext0, overlay2, overlay1, overlay0, surface2, surface1,
+        surface0, base, mantle, crust,
+    );
+}
+
 #[cfg(test)]
 mod tests {
     use super::Flavour;

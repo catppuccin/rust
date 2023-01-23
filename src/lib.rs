@@ -51,6 +51,12 @@
 //! Enable the `ansi` feature to add the
 //! [`Colour::ansi_paint`](crate::Colour::ansi_paint) method.
 //! This adds [ansi-term](https://crates.io/crates/ansi_term) as a dependency.
+//!
+//! ### CSS colours
+//!
+//! Enable the `css` feature to allow the conversion of Catppuccin colours to
+//! [`css_colors::RGB`](css_colors::RGB) instances.
+//! This adds [css-colors](https://crates.io/crates/css-colors) as a dependency.
 
 mod colour;
 pub use colour::Colour;
