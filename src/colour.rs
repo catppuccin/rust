@@ -24,11 +24,11 @@ impl Colour {
 #[cfg(feature = "css")]
 impl From<Colour> for css_colors::RGB {
     fn from(value: Colour) -> Self {
-        return Self {
+        Self {
             r: css_colors::Ratio::from_u8(value.0),
             g: css_colors::Ratio::from_u8(value.1),
             b: css_colors::Ratio::from_u8(value.2),
-        };
+        }
     }
 }
 

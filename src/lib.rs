@@ -58,6 +58,9 @@
 //! [`css_colors::RGB`](css_colors::RGB) instances.
 //! This adds [css-colors](https://crates.io/crates/css-colors) as a dependency.
 
+#[cfg(feature = "css")]
+pub use css_colors;
+
 mod colour;
 pub use colour::Colour;
 
