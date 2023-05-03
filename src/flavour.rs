@@ -1,8 +1,9 @@
 use crate::{Colour, FlavourColours};
 
-/// One of the four Catppuccin flavours; Latte, Frappé, Macchiato, or Mocha.
+/// One of the ~~four~~ five Catppuccin flavours; Latte, Frappé, Macchiato, Mocha, or Oled
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Flavour {
+    Oled,
     Latte,
     Frappe,
     Macchiato,
@@ -28,6 +29,7 @@ impl Flavour {
     /// Returns the name of the flavour in lowercase.
     pub fn name(self) -> &'static str {
         match self {
+            Self::Oled => "oled",
             Self::Latte => "latte",
             Self::Frappe => "frappe",
             Self::Macchiato => "macchiato",
@@ -37,6 +39,35 @@ impl Flavour {
 
     pub fn colours(self) -> FlavourColours {
         match self {
+            Self::Oled => FlavourColours {
+                rosewater: Colour(245, 224, 220),
+                flamingo: Colour(242, 205, 205),
+                pink: Colour(245, 194, 231),
+                mauve: Colour(203, 166, 247),
+                red: Colour(243, 139, 168),
+                maroon: Colour(235, 160, 172),
+                peach: Colour(250, 179, 135),
+                yellow: Colour(249, 226, 175),
+                green: Colour(166, 227, 161),
+                teal: Colour(148, 226, 213),
+                sky: Colour(137, 220, 235),
+                sapphire: Colour(116, 199, 236),
+                blue: Colour(137, 180, 250),
+                lavender: Colour(180, 190, 254),
+                text: Colour(205, 214, 244),
+                subtext1: Colour(186, 194, 222),
+                subtext0: Colour(166, 173, 200),
+                overlay2: Colour(147, 153, 178),
+                overlay1: Colour(127, 132, 156),
+                overlay0: Colour(108, 112, 134),
+                surface2: Colour(88, 91, 112),
+                surface1: Colour(69, 71, 90),
+                surface0: Colour(49, 50, 68),
+                base: Colour(2, 2, 2),
+                mantle: Colour(1, 1, 1),
+                crust: Colour(0, 0, 0),
+            },
+
             Self::Latte => FlavourColours {
                 rosewater: Colour(220, 138, 120),
                 flamingo: Colour(221, 120, 120),
@@ -153,8 +184,15 @@ impl Flavour {
     }
 
     /// Returns an iterator over the four delicious Catppuccin flavours.
-    pub fn into_iter() -> std::array::IntoIter<Flavour, 4> {
-        [Self::Latte, Self::Frappe, Self::Macchiato, Self::Mocha].into_iter()
+    pub fn into_iter() -> std::array::IntoIter<Flavour, 5> {
+        [
+            Self::Oled,
+            Self::Latte,
+            Self::Frappe,
+            Self::Macchiato,
+            Self::Mocha,
+        ]
+        .into_iter()
     }
 }
 
