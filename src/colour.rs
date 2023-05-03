@@ -3,7 +3,7 @@ use std::{borrow::Cow, fmt::Debug};
 
 /// A simple three-channel RGB colour representation.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct Colour(pub(crate) u8, pub(crate) u8, pub(crate) u8);
+pub struct Colour(pub u8, pub u8, pub u8);
 
 impl Colour {
     /// Returns a hexadecimal string representing the colour.
