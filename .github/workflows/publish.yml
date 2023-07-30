@@ -6,13 +6,18 @@ on:
       - "v*"
 
 jobs:
-  publish-crate:
+  build-and-publish:
     runs-on: ubuntu-22.04
+    env:
+      RUST_BACKTRACE: 1
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --all-features --verbose
+      - run: cargo test --all-features --verbose
       - uses: katyo/publish-crates@v2
         with:
           registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
