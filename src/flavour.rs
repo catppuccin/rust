@@ -174,9 +174,12 @@ impl Flavour {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
+    use indoc::indoc;
+
     use super::Flavour;
     use crate::flavour_colours::validate_colours;
-    use indoc::indoc;
 
     #[test]
     fn verify_colour_methods() {
@@ -208,6 +211,13 @@ mod tests {
         let _base = Flavour::Latte.base();
         let _mantle = Flavour::Latte.mantle();
         let _crust = Flavour::Latte.crust();
+    }
+
+    #[test]
+    fn create_hashmap_from_flavour() {
+        let colours: HashMap<_, _> = Flavour::Mocha.colours().into_fields_iter().collect();
+        assert_eq!(colours.len(), 26);
+        assert_eq!(colours["red"], Flavour::Mocha.red());
     }
 
     #[test]

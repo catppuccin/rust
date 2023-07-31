@@ -1,7 +1,7 @@
 [package]
 name = "catppuccin"
-version = "1.2.2"
-authors = ["backwardspy <backwardspy@gmail.com>"]
+version = "1.3.0"
+authors = ["Catppuccin Org <releases@catppuccin.com>"]
 edition = "2021"
 description = "🦀 Soothing pastel theme for Rust."
 repository = "https://github.com/catppuccin/rust"
