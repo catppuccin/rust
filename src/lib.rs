@@ -1,122 +1,164 @@
-//! 🦀 Soothing pastel theme for Rust.
-//!
-//! # Usage
-//!
-//! Add Catppuccin to your project's `Cargo.toml`:
-//!
-//! ```toml
-//! [dependencies]
-#![doc = concat!("catppuccin = \"", env!("CARGO_PKG_VERSION"), "\"")]
-//! ```
-//!
-//! # Example
-//!
-//! ```rust
-//! use catppuccin::Flavour;
-//!
-//! struct Button {
-//!     text: String,
-//!     background_colour: String,
-//! };
-//!
-//! fn confirm(text: String) -> Button {
-//!     Button {
-//!         text,
-//!         background_colour: Flavour::Mocha.green().hex(),
-//!     }
-//! }
-//! ```
-//!
-//! More examples can be found
-//! [here](https://github.com/catppuccin/rust/tree/main/examples).
-//!
-//! Clone the repository to run them locally:
-//!
-//! ```bash
-//! $ cargo run --example simple
-//! ```
-//!
-//! ![Output from simple example](https://raw.githubusercontent.com/catppuccin/rust/main/assets/simple-example.png)
-//!
-//! ```bash
-//! $ cargo run --features ansi --example term
-//! ```
-//!
-//! ![Output from term example](https://raw.githubusercontent.com/catppuccin/rust/main/assets/term-example.png)
-//!
-//! # Optional Features
-//!
-//! ## ANSI string painting
-//!
-//! Enable the `ansi` feature to add the
-//! [`Colour::ansi_paint`](crate::Colour::ansi_paint) method.
-//! This adds [ansi-term](https://crates.io/crates/ansi_term) as a dependency.
-//!
-//! ### CSS colours
-//!
-//! Enable the `css` feature to allow the conversion of Catppuccin colours to
-//! [`css_colors::RGB`](css_colors::RGB) instances.
-//! This adds [css-colors](https://crates.io/crates/css-colors) as a dependency.
+#![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::unwrap_used)]
 
-#[cfg(feature = "css")]
-pub use css_colors;
+#[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
+pub struct Color {
+    pub name: &'static str,
+    pub is_accent: bool,
+    pub hex: &'static str,
+    pub rgb: &'static [u8; 3],
+    pub hsl: &'static [f32; 3],
+}
 
-mod colour;
-pub use colour::Colour;
+#[derive(Debug)]
+pub struct Flavor {
+    pub name: &'static str,
+    pub dark: bool,
+    pub colors: phf::Map<&'static str, Color>,
+}
 
-mod flavour_colours;
-pub use flavour_colours::FlavourColours;
+#[derive(Debug)]
+pub struct Palette {
+    pub flavors: phf::Map<&'static str, Flavor>,
+}
 
-mod flavour;
-pub use flavour::Flavour;
+include!(concat!(env!("OUT_DIR"), "/codegen.rs"));
+
+static FLAVORS_ORDER: &[&str] = &["latte", "frappe", "macchiato", "mocha"];
+static COLOURS_ORDER: &[&str] = &[
+    "rosewater",
+    "flamingo",
+    "pink",
+    "mauve",
+    "red",
+    "maroon",
+    "peach",
+    "yellow",
+    "green",
+    "teal",
+    "sky",
+    "sapphire",
+    "blue",
+    "lavender",
+    "text",
+    "subtext1",
+    "subtext0",
+    "overlay2",
+    "overlay1",
+    "overlay0",
+    "surface2",
+    "surface1",
+    "surface0",
+    "base",
+    "mantle",
+    "crust",
+];
+
+pub struct FlavorIterator {
+    current: usize,
+}
+
+pub struct ColorIterator {
+    flavor: &'static Flavor,
+    current: usize,
+}
+
+impl Iterator for FlavorIterator {
+    type Item = &'static Flavor;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current >= FLAVORS_ORDER.len() {
+            None
+        } else {
+            let flavor = FLAVORS_ORDER[self.current];
+            self.current += 1;
+            Some(&PALETTE.flavors[flavor])
+        }
+    }
+}
+
+impl Iterator for ColorIterator {
+    type Item = &'static Color;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current >= COLOURS_ORDER.len() {
+            None
+        } else {
+            let color = COLOURS_ORDER[self.current];
+            self.current += 1;
+            Some(&self.flavor.colors[color])
+        }
+    }
+}
+
+impl Palette {
+    #[must_use]
+    pub const fn iter(&self) -> FlavorIterator {
+        FlavorIterator { current: 0 }
+    }
+}
+
+impl Flavor {
+    #[must_use]
+    pub const fn iter(&'static self) -> ColorIterator {
+        ColorIterator {
+            flavor: self,
+            current: 0,
+        }
+    }
+}
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
-    use super::Flavour;
+    use super::*;
 
-    /// Ensures flavours are iterated in the correct order.
-    #[test]
-    fn test_flavours_iter() {
-        let mut flavours = Flavour::into_iter();
-        assert_eq!(flavours.next(), Some(Flavour::Latte));
-        assert_eq!(flavours.next(), Some(Flavour::Frappe));
-        assert_eq!(flavours.next(), Some(Flavour::Macchiato));
-        assert_eq!(flavours.next(), Some(Flavour::Mocha));
-        assert_eq!(flavours.next(), None);
+    fn assert_flavor(flavor: Option<&Flavor>, name: &str) {
+        assert!(flavor.is_some());
+        assert_eq!(flavor.unwrap().name, name);
     }
 
-    /// Ensures colours within each flavour are iterated in the correct order.
+    fn assert_color(color: Option<&Color>, name: &str) {
+        assert!(color.is_some());
+        assert_eq!(color.unwrap().name, name);
+    }
+
     #[test]
-    fn test_colours_iter() {
-        for flavour in Flavour::into_iter() {
-            let colours = flavour.colours();
-            let mut colours_iter = colours.into_iter();
-            assert_eq!(colours_iter.next(), Some(colours.rosewater));
-            assert_eq!(colours_iter.next(), Some(colours.flamingo));
-            assert_eq!(colours_iter.next(), Some(colours.pink));
-            assert_eq!(colours_iter.next(), Some(colours.mauve));
-            assert_eq!(colours_iter.next(), Some(colours.red));
-            assert_eq!(colours_iter.next(), Some(colours.maroon));
-            assert_eq!(colours_iter.next(), Some(colours.peach));
-            assert_eq!(colours_iter.next(), Some(colours.yellow));
-            assert_eq!(colours_iter.next(), Some(colours.green));
-            assert_eq!(colours_iter.next(), Some(colours.teal));
-            assert_eq!(colours_iter.next(), Some(colours.sky));
-            assert_eq!(colours_iter.next(), Some(colours.sapphire));
-            assert_eq!(colours_iter.next(), Some(colours.blue));
-            assert_eq!(colours_iter.next(), Some(colours.lavender));
-            assert_eq!(colours_iter.next(), Some(colours.text));
-            assert_eq!(colours_iter.next(), Some(colours.subtext1));
-            assert_eq!(colours_iter.next(), Some(colours.subtext0));
-            assert_eq!(colours_iter.next(), Some(colours.overlay2));
-            assert_eq!(colours_iter.next(), Some(colours.overlay1));
-            assert_eq!(colours_iter.next(), Some(colours.overlay0));
-            assert_eq!(colours_iter.next(), Some(colours.surface2));
-            assert_eq!(colours_iter.next(), Some(colours.surface1));
-            assert_eq!(colours_iter.next(), Some(colours.surface0));
-            assert_eq!(colours_iter.next(), Some(colours.base));
-            assert_eq!(colours_iter.next(), Some(colours.mantle));
-            assert_eq!(colours_iter.next(), Some(colours.crust));
-        }
+    fn iterate_flavors() {
+        let mut iter = PALETTE.iter();
+        assert_flavor(iter.next(), "latte");
+        assert_flavor(iter.next(), "frappe");
+        assert_flavor(iter.next(), "macchiato");
+        assert_flavor(iter.next(), "mocha");
+        assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn iterate_colors() {
+        let mut iter = PALETTE.flavors["latte"].iter();
+        assert_color(iter.next(), "rosewater");
+        assert_color(iter.next(), "flamingo");
+        assert_color(iter.next(), "pink");
+        assert_color(iter.next(), "mauve");
+        assert_color(iter.next(), "red");
+        assert_color(iter.next(), "maroon");
+        assert_color(iter.next(), "peach");
+        assert_color(iter.next(), "yellow");
+        assert_color(iter.next(), "green");
+        assert_color(iter.next(), "teal");
+        assert_color(iter.next(), "sky");
+        assert_color(iter.next(), "sapphire");
+        assert_color(iter.next(), "blue");
+        assert_color(iter.next(), "lavender");
+        assert_color(iter.next(), "text");
+        assert_color(iter.next(), "subtext1");
+        assert_color(iter.next(), "subtext0");
+        assert_color(iter.next(), "overlay2");
+        assert_color(iter.next(), "overlay1");
+        assert_color(iter.next(), "overlay0");
+        assert_color(iter.next(), "surface2");
+        assert_color(iter.next(), "surface1");
+        assert_color(iter.next(), "surface0");
+        assert_color(iter.next(), "base");
+        assert_color(iter.next(), "mantle");
+        assert_color(iter.next(), "crust");
+        assert!(iter.next().is_none());
     }
 }
