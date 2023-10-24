@@ -1,5 +1,8 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::unwrap_used)]
 
+mod palette;
+pub use palette::PALETTE;
+
 #[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
 pub struct Color {
     pub name: &'static str,
@@ -20,8 +23,6 @@ pub struct Flavor {
 pub struct Palette {
     pub flavors: phf::Map<&'static str, Flavor>,
 }
-
-include!(concat!(env!("OUT_DIR"), "/codegen.rs"));
 
 static FLAVORS_ORDER: &[&str] = &["latte", "frappe", "macchiato", "mocha"];
 static COLOURS_ORDER: &[&str] = &[
