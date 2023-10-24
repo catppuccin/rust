@@ -72,6 +72,12 @@ Enable the `css` feature to allow the conversion of Catppuccin colours to
 [`css_colors::RGB`](css_colors::RGB).
 This adds [css-colors](https://crates.io/crates/css-colors) as a dependency.
 
+## Contributing
+
+This project uses [pre-commit](https://pre-commit.com/) to maintain consistent code style and standards.
+
+See also [CONTRIBUTING.md](https://github.com/catppuccin/catppuccin/blob/main/CONTRIBUTING.md)
+
 ## 💝 Thanks to
 
 - [backwardspy](https://github.com/backwardspy)

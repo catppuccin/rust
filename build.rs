@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     writeln!(
         &mut code_writer,
-        "pub static PALETTE: Palette = Palette {{\n    flavors: {}\n}};",
+        "pub static PALETTE: Palette = Palette {{ flavors: {} }};",
         flavors_map.build()
     )?;
 
