@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn download_palette(path: &Path) -> Result<(), Box<dyn Error>> {
-    let contents = reqwest::blocking::get(PALETTE_URL)?.text()?;
+    let contents = ureq::get(PALETTE_URL).call()?.into_string()?;
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }

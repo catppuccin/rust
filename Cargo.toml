@@ -13,9 +13,9 @@ phf = "0.11.2"
 
 [build-dependencies]
 phf_codegen = "0.11.2"
-reqwest = { version = "0.11.22", features = ["blocking"] }
 serde = { version = "1.0.189", features = ["derive"] }
 serde_json = "1.0.107"
+ureq = "2.8.0"
 
 [dev-dependencies]
 ansi_term = "0.12.1"
