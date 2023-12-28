@@ -47,6 +47,13 @@ impl Colour {
     }
 }
 
+#[cfg(feature = "ratatui")]
+impl From<Colour> for ratatui::style::Color {
+    fn from(value: Colour) -> Self {
+        Self::Rgb(value.0, value.1, value.2)
+    }
+}
+
 impl From<Colour> for (u8, u8, u8) {
     /// Converts the colour into a tuple of its component red, green, and blue channels.
     fn from(colour: Colour) -> Self {
