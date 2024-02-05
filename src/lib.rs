@@ -77,7 +77,7 @@ mod tests {
     /// Ensures flavours are iterated in the correct order.
     #[test]
     fn test_flavours_iter() {
-        let mut flavours = Flavour::into_iter();
+        let mut flavours = Flavour::all().into_iter();
         assert_eq!(flavours.next(), Some(Flavour::Latte));
         assert_eq!(flavours.next(), Some(Flavour::Frappe));
         assert_eq!(flavours.next(), Some(Flavour::Macchiato));
@@ -88,7 +88,7 @@ mod tests {
     /// Ensures colours within each flavour are iterated in the correct order.
     #[test]
     fn test_colours_iter() {
-        for flavour in Flavour::into_iter() {
+        for flavour in Flavour::all() {
             let colours = flavour.colours();
             let mut colours_iter = colours.into_iter();
             assert_eq!(colours_iter.next(), Some(colours.rosewater));

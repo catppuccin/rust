@@ -11,12 +11,12 @@ pub enum Flavour {
 
 macro_rules! impl_colour_method {
     ($x:ident) => (
-        pub fn $x(self) -> $crate::Colour {
+        pub const fn $x(self) -> $crate::Colour {
             self.colours().$x
         }
     );
     ($x:ident, $($y:ident),+ $(,)?) => (
-        pub fn $x(self) -> $crate::Colour {
+        pub const fn $x(self) -> $crate::Colour {
             self.colours().$x
         }
 
@@ -26,7 +26,7 @@ macro_rules! impl_colour_method {
 
 impl Flavour {
     /// Returns the name of the flavour in lowercase.
-    pub fn name(self) -> &'static str {
+    pub const fn name(self) -> &'static str {
         match self {
             Self::Latte => "latte",
             Self::Frappe => "frappe",
@@ -35,7 +35,7 @@ impl Flavour {
         }
     }
 
-    pub fn colours(self) -> FlavourColours {
+    pub const fn colours(self) -> FlavourColours {
         match self {
             Self::Latte => FlavourColours {
                 rosewater: Colour(220, 138, 120),
@@ -152,9 +152,9 @@ impl Flavour {
         }
     }
 
-    /// Returns an iterator over the four delicious Catppuccin flavours.
-    pub fn into_iter() -> std::array::IntoIter<Flavour, 4> {
-        [Self::Latte, Self::Frappe, Self::Macchiato, Self::Mocha].into_iter()
+    /// Returns an array of the four delicious Catppuccin flavours.
+    pub fn all() -> [Self; 4] {
+        [Self::Latte, Self::Frappe, Self::Macchiato, Self::Mocha]
     }
 }
 

@@ -2,7 +2,7 @@ use catppuccin::Flavour;
 
 fn main() {
     // iterate over the four Catppuccin flavours.
-    for flavour in Flavour::into_iter() {
+    for flavour in Flavour::all() {
         println!("{}", flavour.name());
 
         // iterate over the 26 colours in the flavour.
