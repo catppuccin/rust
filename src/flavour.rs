@@ -153,7 +153,7 @@ impl Flavour {
     }
 
     /// Returns an array of the four delicious Catppuccin flavours.
-    pub fn all() -> [Self; 4] {
+    pub const fn all() -> [Self; 4] {
         [Self::Latte, Self::Frappe, Self::Macchiato, Self::Mocha]
     }
 }
