@@ -6,10 +6,10 @@ pub use palette::PALETTE;
 #[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
 pub struct Color {
     pub name: &'static str,
-    pub is_accent: bool,
+    pub accent: bool,
     pub hex: &'static str,
     pub rgb: &'static [u8; 3],
-    pub hsl: &'static [f32; 3],
+    pub hsl: &'static [f64; 3],
 }
 
 #[derive(Debug)]
@@ -96,6 +96,15 @@ impl Palette {
     }
 }
 
+impl IntoIterator for &'static Palette {
+    type Item = &'static Flavor;
+    type IntoIter = FlavorIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 impl Flavor {
     #[must_use]
     pub const fn iter(&'static self) -> ColorIterator {
@@ -103,6 +112,15 @@ impl Flavor {
             flavor: self,
             current: 0,
         }
+    }
+}
+
+impl IntoIterator for &'static Flavor {
+    type Item = &'static Color;
+    type IntoIter = ColorIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 
@@ -124,10 +142,10 @@ mod tests {
     #[test]
     fn iterate_flavors() {
         let mut iter = PALETTE.iter();
-        assert_flavor(iter.next(), "latte");
-        assert_flavor(iter.next(), "frappe");
-        assert_flavor(iter.next(), "macchiato");
-        assert_flavor(iter.next(), "mocha");
+        assert_flavor(iter.next(), "Latte");
+        assert_flavor(iter.next(), "Frappé");
+        assert_flavor(iter.next(), "Macchiato");
+        assert_flavor(iter.next(), "Mocha");
         assert!(iter.next().is_none());
     }
 

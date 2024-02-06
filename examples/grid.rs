@@ -20,12 +20,18 @@ fn main() {
             let name = format!(
                 "{}{}",
                 color.name,
-                if color.is_accent { " (accent)" } else { "" }
+                if color.accent { " (accent)" } else { "" }
             );
-            let rgb = format!("rgb({}, {}, {})", color.rgb[0], color.rgb[1], color.rgb[2]);
-            let hsl = format!("hsl({}, {}, {})", color.hsl[0], color.hsl[1], color.hsl[2]);
+            let rgb = format!(
+                "rgb({:3}, {:3}, {:3})",
+                color.rgb[0], color.rgb[1], color.rgb[2]
+            );
+            let hsl = format!(
+                "hsl({:3.0}, {:5.3}, {:5.3})",
+                color.hsl[0], color.hsl[1], color.hsl[2]
+            );
             println!(
-                "{} {:18} →  #{:6}  {:18}  {:18}",
+                "{} {:18} →  {:6}  {:18}  {:18}",
                 ansi(color).reverse().paint("  "),
                 name,
                 color.hex,
