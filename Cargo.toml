@@ -14,10 +14,16 @@ all-features = true
 [dependencies]
 ansi_term = { version = "0.12.1", optional = true }
 css-colors = { version = "1.0.1", optional = true }
+ratatui = { version = "0.25", optional = true }
 
 [dev-dependencies]
 indoc = "1.0.7"
+crossterm = { version = "0.27" }
 
 [features]
 ansi = ["ansi_term"]
 css = ["css-colors"]
+
+[[example]]
+name = "ratatui"
+required-features = ["ratatui"]
