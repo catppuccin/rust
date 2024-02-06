@@ -152,6 +152,11 @@ impl Flavour {
         }
     }
 
+    /// Returns an iterator over the four delicious Catppuccin flavours.
+    pub fn into_iter() -> std::array::IntoIter<Self, 4> {
+        Self::all().into_iter()
+    }
+
     /// Returns an array of the four delicious Catppuccin flavours.
     pub const fn all() -> [Self; 4] {
         [Self::Latte, Self::Frappe, Self::Macchiato, Self::Mocha]
