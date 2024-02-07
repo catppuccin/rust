@@ -8,15 +8,44 @@ repository = "https://github.com/catppuccin/rust"
 license = "MIT"
 keywords = ["catppuccin", "palette", "color", "colorscheme", "theme"]
 
+[package.metadata.docs.rs]
+all-features = true
+
+[lints]
+clippy.all = "warn"
+clippy.pedantic = "warn"
+clippy.nursery = "warn"
+clippy.unwrap_used = "forbid"
+
 [dependencies]
-phf = "0.11.2"
+ansi_term = { version = "0.12.1", optional = true }
+css-colors = { version = "1.0.1", optional = true }
+ratatui = { version = "0.25", optional = true }
+serde = { version = "1.0.196", features = ["derive"], optional = true }
 
 [build-dependencies]
-phf_codegen = "0.11.2"
-serde = { version = "1.0.189", features = ["derive"] }
+serde = { version = "1.0.196", features = ["derive"] }
 serde_json = "1.0.107"
 ureq = "2.8.0"
 
 [dev-dependencies]
-ansi_term = "0.12.1"
-css-colors = "1.0.1"
+crossterm = "0.27"
+serde_json = "1.0.107"
+
+[features]
+ansi-term = ["dep:ansi_term"]
+css-colors = ["dep:css-colors"]
+ratatui = ["dep:ratatui"]
+serde = ["dep:serde"]
+
+[[example]]
+name = "css"
+required-features = ["css-colors"]
+
+[[example]]
+name = "term_grid"
+required-features = ["ansi-term"]
+
+[[example]]
+name = "ratatui"
+required-features = ["ratatui"]

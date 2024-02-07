@@ -63,7 +63,7 @@ $ cargo run --features ansi --example term
 ### ANSI string painting
 
 Enable the `ansi` feature to add the
-[`Colour::ansi_paint`](crate::Colour::ansi_paint) method.
+[`Colour::ansi_paint`] method.
 This adds [ansi-term](https://crates.io/crates/ansi_term) as a dependency.
 
 ### CSS colours

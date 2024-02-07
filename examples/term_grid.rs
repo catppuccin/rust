@@ -1,11 +1,11 @@
 use catppuccin::PALETTE;
 
 fn ansi(color: &catppuccin::Color) -> ansi_term::Colour {
-    ansi_term::Colour::RGB(color.rgb[0], color.rgb[1], color.rgb[2])
+    ansi_term::Colour::RGB(color.rgb.r, color.rgb.g, color.rgb.b)
 }
 
 fn main() {
-    for flavor in PALETTE.iter() {
+    for flavor in &PALETTE {
         let heading = format!(
             "{} ({})",
             flavor.name,
@@ -16,7 +16,7 @@ fn main() {
             ansi_term::Style::new().underline().bold().paint(heading)
         );
 
-        for color in flavor.iter() {
+        for color in flavor {
             let name = format!(
                 "{}{}",
                 color.name,
@@ -24,11 +24,11 @@ fn main() {
             );
             let rgb = format!(
                 "rgb({:3}, {:3}, {:3})",
-                color.rgb[0], color.rgb[1], color.rgb[2]
+                color.rgb.r, color.rgb.g, color.rgb.b
             );
             let hsl = format!(
                 "hsl({:3.0}, {:5.3}, {:5.3})",
-                color.hsl[0], color.hsl[1], color.hsl[2]
+                color.hsl.h, color.hsl.s, color.hsl.l
             );
             println!(
                 "{} {:18} →  {:6}  {:18}  {:18}",
