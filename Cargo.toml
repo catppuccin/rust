@@ -12,6 +12,7 @@ keywords = ["catppuccin", "palette", "color", "colorscheme", "theme"]
 all-features = true
 
 [lints]
+rust.missing_docs = "warn"
 clippy.all = "warn"
 clippy.pedantic = "warn"
 clippy.nursery = "warn"

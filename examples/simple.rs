@@ -1,18 +1,19 @@
-use catppuccin::{Rgb, PALETTE};
+//! Simple example showing how to get colors from the Catppuccin palette.
+use catppuccin::{ColorName, Rgb, PALETTE};
 
 fn main() {
     let latte_teal = PALETTE.latte.colors.teal;
     let Rgb { r, g, b } = latte_teal.rgb;
     println!(
-        "Latte's teal is #{}, which is rgb({r}, {g}, {b})",
+        "Latte's teal is {}, which is rgb({r}, {g}, {b})",
         latte_teal.hex
     );
 
-    // You can also take from the full palette of colors:
-    let mocha = PALETTE.mocha.colors;
-    let Rgb { r, g, b } = mocha.teal.rgb;
+    // you can also get a color by its name:
+    let mocha_teal = PALETTE.mocha.colors[ColorName::Teal];
+    let Rgb { r, g, b } = mocha_teal.rgb;
     println!(
-        "Mocha's teal is #{}, which is rgb({r}, {g}, {b})",
-        mocha.teal.hex
+        "Mocha's teal is {}, which is rgb({r}, {g}, {b})",
+        mocha_teal.hex
     );
 }

@@ -1,6 +1,7 @@
+//! Example demonstrating integration with the `ansi_term` crate.
 use catppuccin::PALETTE;
 
-fn ansi(color: &catppuccin::Color) -> ansi_term::Colour {
+const fn ansi(color: &catppuccin::Color) -> ansi_term::Colour {
     ansi_term::Colour::RGB(color.rgb.r, color.rgb.g, color.rgb.b)
 }
 

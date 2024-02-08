@@ -1,7 +1,11 @@
+//! Example demonstrating integration with the `ratatui` crate.
 use std::io::{self, stdout};
 
 use catppuccin::PALETTE;
-use ratatui::{prelude::*, widgets::*};
+use ratatui::{
+    prelude::*,
+    widgets::{Paragraph, Widget},
+};
 
 fn main() -> io::Result<()> {
     let mut terminal = Terminal::with_options(

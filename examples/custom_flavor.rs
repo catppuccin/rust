@@ -1,3 +1,4 @@
+//! Example demonstrating how to make a custom flavor.
 use catppuccin::Flavor;
 
 fn americano() -> Flavor {

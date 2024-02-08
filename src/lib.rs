@@ -61,7 +61,8 @@
 //!
 //! Example: [`examples/serde.rs`](https://github.com/catppuccin/rust/blob/main/examples/serde.rs)
 mod generated_palette;
-pub use generated_palette::PALETTE;
+
+pub use generated_palette::{ColorName, FlavorColors, PALETTE};
 
 /// The top-level type that encompasses the Catppuccin palette data structure.
 /// Primarily used via the [`PALETTE`] constant.
@@ -70,9 +71,13 @@ pub use generated_palette::PALETTE;
 /// Latte, Frappé, Macchiato, Mocha.
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Palette {
+    /// The light flavor.
     pub latte: Flavor,
+    /// The lightest dark flavor.
     pub frappe: Flavor,
+    /// The medium dark flavor.
     pub macchiato: Flavor,
+    /// The darkest dark flavor.
     pub mocha: Flavor,
 }
 
@@ -141,39 +146,6 @@ pub struct Flavor {
     pub colors: FlavorColors,
 }
 
-/// All of the colors for a particular flavor of Catppuccin.
-/// Obtained via [`Flavor::colors`].
-#[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct FlavorColors {
-    pub rosewater: Color,
-    pub flamingo: Color,
-    pub pink: Color,
-    pub mauve: Color,
-    pub red: Color,
-    pub maroon: Color,
-    pub peach: Color,
-    pub yellow: Color,
-    pub green: Color,
-    pub teal: Color,
-    pub sky: Color,
-    pub sapphire: Color,
-    pub blue: Color,
-    pub lavender: Color,
-    pub text: Color,
-    pub subtext1: Color,
-    pub subtext0: Color,
-    pub overlay2: Color,
-    pub overlay1: Color,
-    pub overlay0: Color,
-    pub surface2: Color,
-    pub surface1: Color,
-    pub surface0: Color,
-    pub base: Color,
-    pub mantle: Color,
-    pub crust: Color,
-}
-
 /// An iterator over colors in a flavor.
 /// Obtained via [`Flavor::into_iter()`](struct.Flavor.html#method.into_iter) or [`FlavorColors::iter()`].
 pub struct ColorIterator {
@@ -196,39 +168,6 @@ impl Palette {
 }
 
 impl FlavorColors {
-    /// Get an array of the colors in the flavor.
-    #[must_use]
-    pub const fn all_colors(&'static self) -> [&'static Color; 26] {
-        [
-            &self.rosewater,
-            &self.flamingo,
-            &self.pink,
-            &self.mauve,
-            &self.red,
-            &self.maroon,
-            &self.peach,
-            &self.yellow,
-            &self.green,
-            &self.teal,
-            &self.sky,
-            &self.sapphire,
-            &self.blue,
-            &self.lavender,
-            &self.text,
-            &self.subtext1,
-            &self.subtext0,
-            &self.overlay2,
-            &self.overlay1,
-            &self.overlay0,
-            &self.surface2,
-            &self.surface1,
-            &self.surface0,
-            &self.base,
-            &self.mantle,
-            &self.crust,
-        ]
-    }
-
     /// Create an iterator over the colors in the flavor.
     #[must_use]
     pub const fn iter(&'static self) -> ColorIterator {
@@ -286,6 +225,7 @@ impl IntoIterator for &'static FlavorColors {
 }
 
 impl Flavor {
+    /// Create an iterator over the colors in the flavor.
     #[must_use]
     pub const fn iter(&'static self) -> ColorIterator {
         self.colors.iter()
