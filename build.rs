@@ -185,7 +185,9 @@ fn make_colorname_enum<W: Write>(w: &mut W, palette: &Palette) -> Result<(), Box
         .keys()
         .map(|name| {
             format!(
-                "/// {}\n    #[cfg_attr(feature = \"serde\", serde(rename = \"{name}\"))]\n    {},",
+                r#"/// {}
+    #[cfg_attr(feature = "serde", serde(rename = "{name}"))]
+    {},"#,
                 color_divs(name, palette),
                 titlecase(name)
             )
@@ -193,11 +195,11 @@ fn make_colorname_enum<W: Write>(w: &mut W, palette: &Palette) -> Result<(), Box
         .collect::<Vec<_>>();
     writeln!(
         w,
-        "/// Enum of all named Catppuccin colors. Can be used to index into a [`FlavorColors`].
-#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]
+        r#"/// Enum of all named Catppuccin colors. Can be used to index into a [`FlavorColors`].
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ColorName {{
     {}
-}}",
+}}"#,
         fields.join("\n    ")
     )?;
     Ok(())
