@@ -17,7 +17,6 @@ const PALETTE_URL: &str =
 const PALETTE_PATH: &str = ".cache/palette-v1.0.3.json";
 const CODEGEN_PATH: &str = "./src/generated_palette.rs";
 
-#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct Rgb {
     r: u8,
@@ -268,10 +267,18 @@ fn make_color_entry<W: Write>(w: &mut W, color: &Color, name: &str) -> Result<()
                 name: {:?},
                 accent: {:?},
                 hex: {:?},
-                rgb: {:?},
-                hsl: {:?},
+                rgb: Rgb {{ r: {:?}, g: {:?}, b: {:?} }},
+                hsl: Hsl {{ h: {:?}, s: {:?}, l: {:?} }},
             }},"#,
-        name, color.accent, color.hex, color.rgb, color.hsl,
+        name,
+        color.accent,
+        color.hex,
+        color.rgb.r,
+        color.rgb.g,
+        color.rgb.b,
+        color.hsl.h,
+        color.hsl.s,
+        color.hsl.l,
     )?;
     Ok(())
 }
