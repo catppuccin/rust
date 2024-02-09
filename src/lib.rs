@@ -69,7 +69,11 @@ pub use generated_palette::{ColorName, FlavorColors, PALETTE};
 ///
 /// Can be iterated over, in which case the flavors are yielded in the canonical order:
 /// Latte, Frappé, Macchiato, Mocha.
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(bound(deserialize = "'de: 'static"))
+)]
 pub struct Palette {
     /// The light flavor.
     pub latte: Flavor,
@@ -89,7 +93,7 @@ pub struct FlavorIterator {
 
 /// Color represented as individual red, green, and blue channels.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Rgb {
     /// Red channel.
     pub r: u8,
@@ -101,7 +105,7 @@ pub struct Rgb {
 
 /// Color represented as individual hue (0-359), saturation (0-1), and lightness (0-1) channels.
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Hsl {
     /// Hue channel.
     pub h: f64,
@@ -113,7 +117,7 @@ pub struct Hsl {
 
 /// A single color in the Catppuccin palette.
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Color {
     /// The name of the color, such as "mauve" or "overlay2".
     pub name: &'static str,
@@ -135,7 +139,7 @@ pub struct Color {
 ///
 /// Can be iterated over, in which case the colors are yielded in order.
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Flavor {
     /// The name of the flavor, such as "Latte" or "Mocha".
     pub name: &'static str,
