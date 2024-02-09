@@ -17,6 +17,7 @@ const PALETTE_URL: &str =
 const PALETTE_PATH: &str = ".cache/palette-v1.0.3.json";
 const CODEGEN_PATH: &str = "./src/generated_palette.rs";
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 struct Rgb {
     r: u8,
@@ -132,7 +133,7 @@ fn make_flavorcolors_struct<W: Write>(w: &mut W, palette: &Palette) -> Result<()
         r#"/// All of the colors for a particular flavor of Catppuccin.
 /// Obtained via [`Flavor::colors`].
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(bound(deserialize = "'de: 'static")))]
 pub struct FlavorColors {{
     {}
 }}"#,
@@ -185,7 +186,7 @@ fn make_colorname_enum<W: Write>(w: &mut W, palette: &Palette) -> Result<(), Box
         .keys()
         .map(|name| {
             format!(
-                "/// {}\n    {},",
+                "/// {}\n    #[cfg_attr(feature = \"serde\", serde(rename = \"{name}\"))]\n    {},",
                 color_divs(name, palette),
                 titlecase(name)
             )
@@ -194,6 +195,7 @@ fn make_colorname_enum<W: Write>(w: &mut W, palette: &Palette) -> Result<(), Box
     writeln!(
         w,
         "/// Enum of all named Catppuccin colors. Can be used to index into a [`FlavorColors`].
+#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]
 pub enum ColorName {{
     {}
 }}",
@@ -266,18 +268,10 @@ fn make_color_entry<W: Write>(w: &mut W, color: &Color, name: &str) -> Result<()
                 name: {:?},
                 accent: {:?},
                 hex: {:?},
-                rgb: Rgb {{ r: {:?}, g: {:?}, b: {:?} }},
-                hsl: Hsl {{ h: {:?}, s: {:?}, l: {:?} }},
+                rgb: {:?},
+                hsl: {:?},
             }},"#,
-        name,
-        color.accent,
-        color.hex,
-        color.rgb.r,
-        color.rgb.g,
-        color.rgb.b,
-        color.hsl.h,
-        color.hsl.s,
-        color.hsl.l,
+        name, color.accent, color.hex, color.rgb, color.hsl,
     )?;
     Ok(())
 }
