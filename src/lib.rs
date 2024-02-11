@@ -241,6 +241,14 @@ impl IntoIterator for &'static Flavor {
     }
 }
 
+impl Index<ColorName> for Flavor {
+    type Output = Color;
+
+    fn index(&self, index: ColorName) -> &Self::Output {
+        self.colors.index(index)
+    }
+}
+
 impl From<(u8, u8, u8)> for Rgb {
     fn from((r, g, b): (u8, u8, u8)) -> Self {
         Self { r, g, b }
