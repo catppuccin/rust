@@ -60,9 +60,9 @@
 //! This adds [serde](https://crates.io/crates/serde) as a dependency.
 //!
 //! Example: [`examples/serde.rs`](https://github.com/catppuccin/rust/blob/main/examples/serde.rs)
-mod generated_palette;
+use std::ops::Index;
 
-pub use generated_palette::{ColorName, FlavorColors, PALETTE};
+include!(concat!(env!("OUT_DIR"), "/generated_palette.rs"));
 
 /// The top-level type that encompasses the Catppuccin palette data structure.
 /// Primarily used via the [`PALETTE`] constant.
