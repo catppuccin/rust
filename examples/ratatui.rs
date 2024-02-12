@@ -30,7 +30,7 @@ fn main() -> io::Result<()> {
                 .collect();
 
             let width = buf.area.width;
-            Paragraph::new(flavor.name).render(Rect::new(0, 0, width, 1), buf);
+            Paragraph::new(flavor.name.to_string()).render(Rect::new(0, 0, width, 1), buf);
             Paragraph::new(Line::from(analogous)).render(Rect::new(0, 1, width, 1), buf);
             Paragraph::new(Line::from(monochromatic)).render(Rect::new(0, 2, width, 1), buf);
         })?;
