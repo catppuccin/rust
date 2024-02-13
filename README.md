@@ -85,7 +85,7 @@ See also [CONTRIBUTING.md](https://github.com/catppuccin/catppuccin/blob/main/CO
 ## 💝 Thanks to
 
 - [backwardspy](https://github.com/backwardspy)
-- [Gingeh](https://github.com/Gingeh)]
+- [Gingeh](https://github.com/Gingeh)
 - [Julius](https://github.com/juliuskreutz)
 - [Nyx](https://github.com/nyxkrage)
 
