@@ -6,15 +6,13 @@ use std::{
     collections::HashMap,
     env,
     error::Error,
-    fs::{self, File},
+    fs::File,
     io::{BufReader, BufWriter, Write},
-    path::{Path, PathBuf},
+    path::PathBuf,
 };
 
 use itertools::Itertools;
 use serde::Deserialize;
-
-const PALETTE_VERSION: &str = "v1.1.0";
 
 #[derive(Debug, Deserialize)]
 struct Rgb {
@@ -49,19 +47,13 @@ type Palette = HashMap<String, Flavor>;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let out_dir = PathBuf::from(&env::var("OUT_DIR")?);
-    let palette_path = out_dir.join(PALETTE_VERSION).join("palette.json");
-
-    if !palette_path.exists() {
-        download_palette(&palette_path)?;
-    }
-
-    let palette: Palette = serde_json::from_reader(BufReader::new(File::open(palette_path)?))?;
-
     let codegen_path = out_dir.join("generated_palette.rs");
-    let codegen_file = BufWriter::new(File::create(codegen_path)?);
-    let mut code_writer = BufWriter::new(codegen_file);
+    let mut code_writer = BufWriter::new(File::create(codegen_path)?);
 
+    let palette: Palette =
+        serde_json::from_reader(BufReader::new(File::open("src/palette.json")?))?;
     let sample_flavor = palette.values().next().expect("at least one flavor");
+
     make_flavorcolors_struct(&mut code_writer, &palette)?;
     make_flavorcolors_all_impl(&mut code_writer, sample_flavor)?;
     make_colorname_enum(&mut code_writer, &palette)?;
@@ -69,18 +61,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     make_colorname_display_impl(&mut code_writer, sample_flavor)?;
     make_palette_const(&mut code_writer, &palette)?;
 
-    Ok(())
-}
-
-fn download_palette(path: &Path) -> Result<(), Box<dyn Error>> {
-    let palette_url = format!(
-        "https://raw.githubusercontent.com/catppuccin/palette/{PALETTE_VERSION}/palette.json"
-    );
-    let contents = ureq::get(&palette_url).call()?.into_string()?;
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)?;
-    }
-    fs::write(path, contents)?;
     Ok(())
 }
 
