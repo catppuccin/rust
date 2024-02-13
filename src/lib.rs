@@ -88,6 +88,7 @@ pub enum FlavorName {
     /// The light flavor.
     Latte,
     /// The lightest dark flavor.
+    #[cfg_attr(feature = "serde", serde(rename = "Frappé"))]
     Frappe,
     /// The medium dark flavor.
     Macchiato,
