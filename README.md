@@ -19,24 +19,22 @@
 
 Add Catppuccin to your project's `Cargo.toml`:
 
-```bash
+```console
 $ cargo add catppuccin
 ```
 
 ## Example
 
 ```rust
-use catppuccin::Flavour;
-
 struct Button {
     text: String,
-    background_colour: String,
+    background_color: String,
 };
 
 fn confirm(text: String) -> Button {
     Button {
         text,
-        background_colour: Flavour::Mocha.green().hex(),
+        background_color: catppuccin::PALETTE.mocha.colors.green.hex.to_string(),
     }
 }
 ```
@@ -44,33 +42,39 @@ fn confirm(text: String) -> Button {
 More examples can be found
 [here](https://github.com/catppuccin/rust/tree/main/examples).
 
-Clone the repository to run them locally:
-
-```bash
-$ cargo run --example simple
-```
-
-![Output from simple example](https://raw.githubusercontent.com/catppuccin/rust/main/assets/simple-example.png)
-
-```bash
-$ cargo run --features ansi --example term
-```
-
-![Output from term example](https://raw.githubusercontent.com/catppuccin/rust/main/assets/term-example.png)
-
 ## Optional Features
 
 ### ANSI string painting
 
-Enable the `ansi` feature to add the
-[`Colour::ansi_paint`] method.
+Enable the `ansi-term` feature to add the
+`Color::ansi_paint` method.
 This adds [ansi-term](https://crates.io/crates/ansi_term) as a dependency.
 
-### CSS colours
+Example: [`examples/term_grid.rs`](https://github.com/catppuccin/rust/blob/main/examples/term_grid.rs)
 
-Enable the `css` feature to allow the conversion of Catppuccin colours to
-[`css_colors::RGB`](css_colors::RGB).
+#### CSS colors
+
+Enable the `css-colors` feature to enable the conversion of Catppuccin colors to
+`css_colors::RGB` instances.
 This adds [css-colors](https://crates.io/crates/css-colors) as a dependency.
+
+Example: [`examples/css.rs`](https://github.com/catppuccin/rust/blob/main/examples/css.rs)
+
+#### Ratatui
+
+Enable the `ratatui` feature to enable the conversion of Catppuccin colors to
+`ratatui::style::Color` instances.
+This adds [ratatui](https://crates.io/crates/ratatui) as a dependency.
+
+Example: [`examples/ratatui.rs`](https://github.com/catppuccin/rust/blob/main/examples/ratatui.rs)
+
+#### Serde
+
+Enable the `serde` feature to enable the serialization of Catppuccin's palette,
+flavor, and color types.
+This adds [serde](https://crates.io/crates/serde) as a dependency.
+
+Example: [`examples/serde.rs`](https://github.com/catppuccin/rust/blob/main/examples/serde.rs)
 
 ## Contributing
 
@@ -81,7 +85,8 @@ See also [CONTRIBUTING.md](https://github.com/catppuccin/catppuccin/blob/main/CO
 ## 💝 Thanks to
 
 - [backwardspy](https://github.com/backwardspy)
-- [Gingeh](https://github.com/Gingeh)
+- [Gingeh](https://github.com/Gingeh)]
+- [Julius](https://github.com/juliuskreutz)
 - [Nyx](https://github.com/nyxkrage)
 
 &nbsp;
