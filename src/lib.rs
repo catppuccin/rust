@@ -231,6 +231,29 @@ impl fmt::Display for FlavorName {
     }
 }
 
+impl FlavorName {
+    /// Get the flavor's identifier; the lowercase key used to identify the flavor.
+    /// This differs from `to_string` in that it's intended for machine usage
+    /// rather than presentation.
+    ///
+    /// Example:
+    ///
+    /// ```rust
+    /// let frappe = catppuccin::PALETTE.frappe;
+    /// assert_eq!(frappe.name.to_string(), "Frappé");
+    /// assert_eq!(frappe.name.identifier(), "frappe");
+    /// ```
+    #[must_use]
+    pub const fn identifier(&self) -> &'static str {
+        match self {
+            Self::Latte => "latte",
+            Self::Frappe => "frappe",
+            Self::Macchiato => "macchiato",
+            Self::Mocha => "mocha",
+        }
+    }
+}
+
 impl FlavorColors {
     /// Create an iterator over the colors in the flavor.
     #[must_use]
@@ -294,6 +317,12 @@ impl Flavor {
     pub const fn iter(&self) -> ColorIterator {
         self.colors.iter()
     }
+
+    /// Equivalent to [`<flavor>.name.identifier()`](FlavorName::identifier).
+    #[must_use]
+    pub const fn identifier(&self) -> &'static str {
+        self.name.identifier()
+    }
 }
 
 impl<'a> IntoIterator for &'a Flavor {
@@ -310,6 +339,14 @@ impl Index<ColorName> for Flavor {
 
     fn index(&self, index: ColorName) -> &Self::Output {
         self.colors.index(index)
+    }
+}
+
+impl Color {
+    /// Equivalent to [`<color>.name.identifier()`](ColorName::identifier).
+    #[must_use]
+    pub const fn identifier(&self) -> &'static str {
+        self.name.identifier()
     }
 }
 
