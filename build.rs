@@ -59,6 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     make_colorname_enum(&mut code_writer, &palette)?;
     make_colorname_index_impl(&mut code_writer, sample_flavor)?;
     make_colorname_display_impl(&mut code_writer, sample_flavor)?;
+    make_colorname_identifier_impl(&mut code_writer, sample_flavor)?;
     make_palette_const(&mut code_writer, &palette)?;
 
     Ok(())
@@ -191,6 +192,41 @@ fn make_colorname_display_impl<W: Write>(
         w,
         "impl std::fmt::Display for ColorName {{
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {{
+        match self {{
+            {}
+        }}
+    }}
+}}",
+        match_arms.join("\n            ")
+    )?;
+    Ok(())
+}
+
+fn make_colorname_identifier_impl<W: Write>(
+    w: &mut W,
+    sample_flavor: &Flavor,
+) -> Result<(), Box<dyn Error>> {
+    let match_arms = sample_flavor
+        .colors
+        .keys()
+        .map(|name| format!("Self::{} => {:?},", titlecase(name), name))
+        .collect::<Vec<_>>();
+    writeln!(
+        w,
+        "impl ColorName {{
+    /// Get the color's identifier; the lowercase key used to identify the color.
+    /// This differs from `to_string` in that it's intended for machine usage
+    /// rather than presentation.
+    ///
+    /// Example:
+    ///
+    /// ```rust
+    /// let surface0 = catppuccin::PALETTE.latte.colors.surface0;
+    /// assert_eq!(surface0.name.to_string(), \"Surface 0\");
+    /// assert_eq!(surface0.name.identifier(), \"surface0\");
+    /// ```
+    #[must_use]
+    pub const fn identifier(&self) -> &'static str {{
         match self {{
             {}
         }}
