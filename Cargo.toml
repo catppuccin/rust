@@ -1,28 +1,51 @@
 [package]
 name = "catppuccin"
-version = "1.4.0"
+version = "2.0.0"
 authors = ["Catppuccin Org <releases@catppuccin.com>"]
 edition = "2021"
 description = "🦀 Soothing pastel theme for Rust."
 repository = "https://github.com/catppuccin/rust"
 license = "MIT"
-keywords = ["catppuccin", "palette", "colour", "theme"]
+keywords = ["catppuccin", "palette", "color", "colorscheme", "theme"]
 
 [package.metadata.docs.rs]
 all-features = true
+
+[lints]
+rust.missing_docs = "warn"
+clippy.all = "warn"
+clippy.pedantic = "warn"
+clippy.nursery = "warn"
+clippy.unwrap_used = "forbid"
 
 [dependencies]
 ansi_term = { version = "0.12.1", optional = true }
 css-colors = { version = "1.0.1", optional = true }
 ratatui = { version = "0.25", optional = true }
+serde = { version = "1.0.196", features = ["derive"], optional = true }
+
+[build-dependencies]
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.107"
+itertools = "0.12.1"
 
 [dev-dependencies]
-indoc = "1.0.7"
-crossterm = { version = "0.27" }
+crossterm = "0.27"
+serde_json = "1.0.107"
 
 [features]
-ansi = ["ansi_term"]
-css = ["css-colors"]
+ansi-term = ["dep:ansi_term"]
+css-colors = ["dep:css-colors"]
+ratatui = ["dep:ratatui"]
+serde = ["dep:serde"]
+
+[[example]]
+name = "css"
+required-features = ["css-colors"]
+
+[[example]]
+name = "term_grid"
+required-features = ["ansi-term"]
 
 [[example]]
 name = "ratatui"

@@ -1,9 +1,8 @@
-use catppuccin::Flavour;
+//! Example demonstrating integration with the `css-colors` crate.
 use css_colors::{percent, Color};
 
-/// Demonstrates integration with the `css-colors` crate.
 fn main() {
-    let teal = Flavour::Mocha.teal();
+    let teal = catppuccin::PALETTE.mocha.colors.teal;
     let rgb: css_colors::RGB = teal.into();
 
     println!("RGB: {}", rgb.to_css());
