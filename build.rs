@@ -60,6 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     make_colorname_index_impl(&mut code_writer, sample_flavor)?;
     make_colorname_display_impl(&mut code_writer, sample_flavor)?;
     make_colorname_identifier_impl(&mut code_writer, sample_flavor)?;
+    make_colorname_fromstr_impl(&mut code_writer, sample_flavor)?;
     make_palette_const(&mut code_writer, &palette)?;
 
     Ok(())
@@ -99,7 +100,7 @@ fn make_flavorcolors_struct<W: Write>(w: &mut W, palette: &Palette) -> Result<()
         r#"/// All of the colors for a particular flavor of Catppuccin.
 /// Obtained via [`Flavor::colors`].
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FlavorColors {{
     {}
 }}"#,
@@ -147,7 +148,7 @@ fn make_colorname_enum<W: Write>(w: &mut W, palette: &Palette) -> Result<(), Box
         w,
         "/// Enum of all named Catppuccin colors. Can be used to index into a [`FlavorColors`].
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-#[cfg_attr(feature = \"serde\", derive(serde::Serialize))]
+#[cfg_attr(feature = \"serde\", derive(serde::Serialize, serde::Deserialize))]
 pub enum ColorName {{
     {}
 }}",
@@ -229,6 +230,32 @@ fn make_colorname_identifier_impl<W: Write>(
     pub const fn identifier(&self) -> &'static str {{
         match self {{
             {}
+        }}
+    }}
+}}",
+        match_arms.join("\n            ")
+    )?;
+    Ok(())
+}
+
+fn make_colorname_fromstr_impl<W: Write>(
+    w: &mut W,
+    sample_flavor: &Flavor,
+) -> Result<(), Box<dyn Error>> {
+    let match_arms = sample_flavor
+        .colors
+        .keys()
+        .map(|name| format!("{:?} => Ok(ColorName::{}),", name, titlecase(name)))
+        .collect::<Vec<_>>();
+    writeln!(
+        w,
+        "impl std::str::FromStr for ColorName {{
+    type Err = ParseColorNameError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {{
+        match s {{
+            {}
+            _ => Err(ParseColorNameError),
         }}
     }}
 }}",
