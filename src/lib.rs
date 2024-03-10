@@ -60,7 +60,7 @@
 //! This adds [serde](https://crates.io/crates/serde) as a dependency.
 //!
 //! Example: [`examples/serde.rs`](https://github.com/catppuccin/rust/blob/main/examples/serde.rs)
-use std::{fmt, marker::PhantomData, ops::Index};
+use std::{fmt, marker::PhantomData, ops::Index, str::FromStr};
 
 include!(concat!(env!("OUT_DIR"), "/generated_palette.rs"));
 
@@ -69,7 +69,7 @@ include!(concat!(env!("OUT_DIR"), "/generated_palette.rs"));
 ///
 /// Can be iterated over, in which case the flavors are yielded in the canonical order:
 /// Latte, Frappé, Macchiato, Mocha.
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Palette {
     /// The light flavor.
     pub latte: Flavor,
@@ -83,7 +83,7 @@ pub struct Palette {
 
 /// Enum of all four flavors of Catppuccin. Can be used to index [`Palette`].
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FlavorName {
     /// The light flavor.
     Latte,
@@ -105,7 +105,7 @@ pub struct FlavorIterator<'a> {
 
 /// Color represented as individual red, green, and blue channels.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Rgb {
     /// Red channel.
     pub r: u8,
@@ -121,7 +121,7 @@ pub struct Hex(Rgb);
 
 /// Color represented as individual hue (0-359), saturation (0-1), and lightness (0-1) channels.
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Hsl {
     /// Hue channel.
     pub h: f64,
@@ -133,7 +133,7 @@ pub struct Hsl {
 
 /// A single color in the Catppuccin palette.
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Color {
     /// The [`ColorName`] for this color.
     pub name: ColorName,
@@ -155,7 +155,7 @@ pub struct Color {
 ///
 /// Can be iterated over, in which case the colors are yielded in order.
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Flavor {
     /// The name of the flavor.
     pub name: FlavorName,
@@ -211,12 +211,33 @@ impl fmt::Display for Hex {
 }
 
 #[cfg(feature = "serde")]
-impl serde::Serialize for Hex {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
+mod _hex {
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    use crate::{Hex, Rgb};
+
+    impl Serialize for Hex {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_str(&self.to_string())
+        }
+    }
+
+    impl<'de> Deserialize<'de> for Hex {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let hex: String = Deserialize::deserialize(deserializer)?;
+            let hex: u32 = u32::from_str_radix(hex.trim_start_matches('#'), 16)
+                .map_err(serde::de::Error::custom)?;
+            let r = ((hex >> 16) & 0xff) as u8;
+            let g = ((hex >> 8) & 0xff) as u8;
+            let b = (hex & 0xff) as u8;
+            Ok(Self(Rgb { r, g, b }))
+        }
     }
 }
 
@@ -227,6 +248,33 @@ impl fmt::Display for FlavorName {
             Self::Frappe => write!(f, "Frappé"),
             Self::Macchiato => write!(f, "Macchiato"),
             Self::Mocha => write!(f, "Mocha"),
+        }
+    }
+}
+
+/// Error type for parsing a [`FlavorName`] from a string.
+#[derive(Debug, PartialEq, Eq)]
+pub struct ParseFlavorNameError;
+impl std::error::Error for ParseFlavorNameError {}
+impl std::fmt::Display for ParseFlavorNameError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "invalid flavor identifier, expected one of: latte, frappe, frappé, macchiato, mocha"
+        )
+    }
+}
+
+impl FromStr for FlavorName {
+    type Err = ParseFlavorNameError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "latte" => Ok(Self::Latte),
+            "frappe" | "frappé" => Ok(Self::Frappe),
+            "macchiato" => Ok(Self::Macchiato),
+            "mocha" => Ok(Self::Mocha),
+            _ => Err(ParseFlavorNameError),
         }
     }
 }
@@ -334,6 +382,16 @@ impl<'a> IntoIterator for &'a Flavor {
     }
 }
 
+/// Error type for parsing a [`ColorName`] from a string.
+#[derive(Debug, PartialEq, Eq)]
+pub struct ParseColorNameError;
+impl std::error::Error for ParseColorNameError {}
+impl std::fmt::Display for ParseColorNameError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid color identifier")
+    }
+}
+
 impl Index<ColorName> for Flavor {
     type Output = Color;
 
@@ -375,6 +433,18 @@ impl From<Color> for css_colors::RGB {
             r: css_colors::Ratio::from_u8(value.rgb.r),
             g: css_colors::Ratio::from_u8(value.rgb.g),
             b: css_colors::Ratio::from_u8(value.rgb.b),
+        }
+    }
+}
+
+#[cfg(feature = "css-colors")]
+impl From<Color> for css_colors::HSL {
+    fn from(value: Color) -> Self {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        Self {
+            h: css_colors::Angle::new(value.hsl.h as u16),
+            s: css_colors::Ratio::from_f32(value.hsl.s as f32),
+            l: css_colors::Ratio::from_f32(value.hsl.l as f32),
         }
     }
 }
