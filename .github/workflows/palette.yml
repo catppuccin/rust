@@ -2,6 +2,8 @@ name: Palette
 
 on:
   push:
+    branches:
+      - '**'
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *' # Run every day at midnight UTC
