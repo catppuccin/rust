@@ -1,9 +1,11 @@
 [package]
 name = "catppuccin"
-version = "2.1.0"
+version = "2.1.1"
 authors = ["Catppuccin Org <releases@catppuccin.com>"]
 edition = "2021"
 description = "🦀 Soothing pastel theme for Rust."
+documentation = "https://docs.rs/catppuccin"
+homepage = "https://github.com/catppuccin/rust"
 repository = "https://github.com/catppuccin/rust"
 license = "MIT"
 keywords = ["catppuccin", "palette", "color", "colorscheme", "theme"]
