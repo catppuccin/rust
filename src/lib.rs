@@ -203,6 +203,22 @@ impl Index<FlavorName> for Palette {
     }
 }
 
+impl Palette {
+    /// Get a flavor by name.
+    ///
+    /// This is equivalent to using the index operator, but can also be used in
+    /// const contexts.
+    #[must_use]
+    pub const fn get_flavor(&self, name: FlavorName) -> &Flavor {
+        match name {
+            FlavorName::Latte => &self.latte,
+            FlavorName::Frappe => &self.frappe,
+            FlavorName::Macchiato => &self.macchiato,
+            FlavorName::Mocha => &self.mocha,
+        }
+    }
+}
+
 impl fmt::Display for Hex {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let Rgb { r, g, b } = self.0;
@@ -397,6 +413,17 @@ impl Index<ColorName> for Flavor {
 
     fn index(&self, index: ColorName) -> &Self::Output {
         self.colors.index(index)
+    }
+}
+
+impl Flavor {
+    /// Get a color by name.
+    ///
+    /// This is equivalent to using the index operator, but can also be used in
+    /// const contexts.
+    #[must_use]
+    pub const fn get_color(&self, name: ColorName) -> &Color {
+        self.colors.get_color(name)
     }
 }
 
