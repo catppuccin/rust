@@ -174,8 +174,22 @@ fn make_colorname_index_impl<W: Write>(
             {}
         }}
     }}
+}}
+
+impl FlavorColors {{
+    /// Get a color by name.
+    ///
+    /// This is equivalent to using the index operator, but can also be used in
+    /// const contexts.
+    #[must_use]
+    pub const fn get_color(&self, name: ColorName) -> &Color {{
+        match name {{
+            {}
+        }}
+    }}
 }}",
-        match_arms.join("\n            ")
+        match_arms.join("\n            "),
+        match_arms.join("\n            "),
     )?;
     Ok(())
 }
@@ -245,7 +259,7 @@ fn make_colorname_fromstr_impl<W: Write>(
     let match_arms = sample_flavor
         .colors
         .keys()
-        .map(|name| format!("{:?} => Ok(ColorName::{}),", name, titlecase(name)))
+        .map(|name| format!("{:?} => Ok(Self::{}),", name, titlecase(name)))
         .collect::<Vec<_>>();
     writeln!(
         w,
