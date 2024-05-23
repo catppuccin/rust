@@ -137,6 +137,8 @@ pub struct Hsl {
 pub struct Color {
     /// The [`ColorName`] for this color.
     pub name: ColorName,
+    /// Order of the color in the palette spec.
+    pub order: u32,
     /// Whether the color is considered an accent color.
     /// Accent colors are the first 14 colors in the palette, also called
     /// the analogous colours. The remaining 12 non-accent colors are also
@@ -161,6 +163,8 @@ pub struct Flavor {
     pub name: FlavorName,
     /// Emoji associated with the flavor. Requires Unicode 13.0 (2020) or later to render.
     pub emoji: char,
+    /// Order of the flavor in the palette spec.
+    pub order: u32,
     /// Whether this flavor is dark or light oriented. Latte is light, the other
     /// three flavors are dark.
     pub dark: bool,

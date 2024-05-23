@@ -39,8 +39,9 @@ struct Color {
 
 #[derive(Debug, Deserialize)]
 struct Flavor {
-    dark: bool,
     emoji: char,
+    order: u32,
+    dark: bool,
     colors: HashMap<String, Color>,
 }
 
@@ -305,10 +306,12 @@ fn make_flavor_entry<W: Write>(
         "Flavor {{
         name: FlavorName::{},
         emoji: '{}',
+        order: {},
         dark: {:?},
         colors: FlavorColors {{",
         titlecase(flavor_key),
         flavor.emoji,
+        flavor.order,
         flavor.dark
     )?;
     for (color_key, color) in &flavor.colors {
@@ -324,12 +327,14 @@ fn make_color_entry<W: Write>(w: &mut W, color: &Color, name: &str) -> Result<()
         w,
         r#"Color {{
                 name: ColorName::{},
+                order: {},
                 accent: {:?},
                 hex: Hex(Rgb {{ r: {:?}, g: {:?}, b: {:?} }}),
                 rgb: Rgb {{ r: {:?}, g: {:?}, b: {:?} }},
                 hsl: Hsl {{ h: {:?}, s: {:?}, l: {:?} }},
             }},"#,
         titlecase(name),
+        color.order,
         color.accent,
         color.rgb.r,
         color.rgb.g,
