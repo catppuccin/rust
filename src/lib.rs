@@ -159,6 +159,8 @@ pub struct Color {
 pub struct Flavor {
     /// The name of the flavor.
     pub name: FlavorName,
+    /// Emoji associated with the flavor. Requires Unicode 13.0 (2020) or later to render.
+    pub emoji: char,
     /// Whether this flavor is dark or light oriented. Latte is light, the other
     /// three flavors are dark.
     pub dark: bool,
