@@ -23,7 +23,7 @@ clippy.unwrap_used = "forbid"
 [dependencies]
 ansi_term = { version = "0.12.1", optional = true }
 css-colors = { version = "1.0.1", optional = true }
-ratatui = { version = "0.25", optional = true }
+ratatui = { version = "0.26", optional = true }
 serde = { version = "1.0.196", features = ["derive"], optional = true }
 
 [build-dependencies]
