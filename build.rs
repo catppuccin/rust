@@ -40,6 +40,7 @@ struct Color {
 #[derive(Debug, Deserialize)]
 struct Flavor {
     dark: bool,
+    emoji: char,
     colors: HashMap<String, Color>,
 }
 
@@ -303,9 +304,11 @@ fn make_flavor_entry<W: Write>(
         w,
         "Flavor {{
         name: FlavorName::{},
+        emoji: '{}',
         dark: {:?},
         colors: FlavorColors {{",
         titlecase(flavor_key),
+        flavor.emoji,
         flavor.dark
     )?;
     for (color_key, color) in &flavor.colors {
