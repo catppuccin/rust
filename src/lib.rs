@@ -170,6 +170,8 @@ pub struct Flavor {
     pub dark: bool,
     /// The colors in the flavor.
     pub colors: FlavorColors,
+    /// The ANSI colors in the flavor.
+    pub ansi_colors: FlavorAnsiColors,
 }
 
 /// An iterator over colors in a flavor.
