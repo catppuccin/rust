@@ -91,6 +91,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         make_flavor_colors_struct(sample_flavor),
         make_flavor_colors_all_impl(sample_flavor),
         make_flavor_ansi_colors_struct(sample_flavor),
+        make_flavor_ansi_colors_all_impl(sample_flavor),
         make_color_name_enum(sample_flavor),
         make_color_name_index_impl(sample_flavor),
         make_color_name_display_impl(sample_flavor),
@@ -224,6 +225,24 @@ fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
             pub hex: Hex,
             /// The color's ANSI code.
             pub code: u8,
+        }
+    }
+}
+
+fn make_flavor_ansi_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
+    let items = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
+        let ident = format_ident!("{identifier}");
+        quote! { &self.#ident }
+    });
+    quote! {
+        impl FlavorAnsiColors {
+            /// Get an array of the ANSI colors in the flavor.
+            #[must_use]
+            pub const fn all_ansi_colors(&self) -> [&AnsiColorPair; 8] {
+                [
+                    #(#items),*
+                ]
+            }
         }
     }
 }
