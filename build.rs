@@ -65,6 +65,7 @@ struct AnsiColorPair {
     bright: AnsiColor,
 }
 
+// TODO: pull in the name of the group here (i.e. "Normal" or "Bright")
 #[derive(Debug, Deserialize)]
 struct AnsiColor {
     rgb: Rgb,

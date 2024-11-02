@@ -526,17 +526,35 @@ impl From<Color> for css_colors::HSL {
 }
 
 #[cfg(feature = "ansi-term")]
-impl Color {
-    /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
-    pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
-        &self,
-        input: I,
-    ) -> ansi_term::ANSIGenericString<'a, S>
-    where
-        I: Into<std::borrow::Cow<'a, S>>,
-        <S as ToOwned>::Owned: core::fmt::Debug,
-    {
-        ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+mod ansi_term {
+    use crate::{AnsiColor, Color};
+
+    impl Color {
+        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
+            &self,
+            input: I,
+        ) -> ansi_term::ANSIGenericString<'a, S>
+        where
+            I: Into<std::borrow::Cow<'a, S>>,
+            <S as ToOwned>::Owned: core::fmt::Debug,
+        {
+            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+        }
+    }
+
+    impl AnsiColor {
+        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
+            &self,
+            input: I,
+        ) -> ansi_term::ANSIGenericString<'a, S>
+        where
+            I: Into<std::borrow::Cow<'a, S>>,
+            <S as ToOwned>::Owned: core::fmt::Debug,
+        {
+            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+        }
     }
 }
 
