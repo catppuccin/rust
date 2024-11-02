@@ -182,6 +182,7 @@ pub struct ColorIterator<'a> {
 }
 
 /// An iterator over the ANSI colors in a flavor.
+/// Obtained via [`FlavorAnsiColors::iter()`].
 pub struct AnsiColorIterator<'a> {
     ansi_colors: &'a FlavorAnsiColors,
     current: usize,

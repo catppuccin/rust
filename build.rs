@@ -16,11 +16,6 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use serde::Deserialize;
 
-// the palette json currently has no order field for ANSI colors.
-const ANSI_COLOR_ORDER: [&str; 8] = [
-    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
-];
-
 #[derive(Debug, Deserialize)]
 struct Palette {
     #[allow(dead_code)]
@@ -64,13 +59,16 @@ struct Hsl {
 
 #[derive(Debug, Deserialize)]
 struct AnsiColorPair {
+    name: String,
+    order: u32,
     normal: AnsiColor,
     bright: AnsiColor,
 }
 
 #[derive(Debug, Deserialize)]
 struct AnsiColor {
-    hex: String,
+    rgb: Rgb,
+    hsl: Hsl,
     code: u8,
 }
 
@@ -95,7 +93,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         make_color_name_display_impl(sample_flavor),
         make_color_name_identifier_impl(sample_flavor),
         make_color_name_fromstr_impl_tokens(sample_flavor),
-
         make_flavor_ansi_colors_struct(sample_flavor),
         make_flavor_ansi_colors_all_impl(sample_flavor),
         make_ansi_color_name_enum(sample_flavor),
@@ -103,7 +100,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         make_ansi_color_name_display_impl(sample_flavor),
         make_ansi_color_name_identifier_impl(sample_flavor),
         make_ansi_color_name_fromstr_impl_tokens(sample_flavor),
-
         make_palette_const(&palette),
     ];
     let ast = syn::parse2(tokens.into_iter().collect())?;
@@ -154,12 +150,11 @@ fn colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(&String, &Color)> {
         .sorted_by(|(_, a), (_, b)| a.order.cmp(&b.order))
 }
 
-fn ansi_colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(&str, &AnsiColorPair)> {
-    ANSI_COLOR_ORDER
+fn ansi_colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(&String, &AnsiColorPair)> {
+    flavor
+        .ansi_colors
         .iter()
-        .map(|key| (*key, &flavor.ansi_colors[*key]))
-        .collect::<Vec<_>>()
-        .into_iter()
+        .sorted_by(|(_, a), (_, b)| a.order.cmp(&b.order))
 }
 
 fn make_flavor_colors_struct(sample_flavor: &Flavor) -> TokenStream {
@@ -182,6 +177,53 @@ fn make_flavor_colors_struct(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
+fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
+    let colors = ansi_colors_in_order(sample_flavor).map(|(k, _)| {
+        let ident = format_ident!("{k}");
+        quote! {
+            /// The normal and bright #ident ANSI color pair.
+            pub #ident: AnsiColorPair
+        }
+    });
+    quote! {
+        /// All of the ANSI colors for a particular flavor of Catppuccin.
+        /// Obtained via [`Flavor::ansi_colors`].
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+        pub struct FlavorAnsiColors {
+            #(#colors),*
+        }
+
+        /// A pair of ANSI colors - normal and bright.
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+        pub struct AnsiColorPair {
+            /// The [`AnsiColorName`] for this color.
+            pub name: AnsiColorName,
+            /// Order of the ANSI color in the palette spec.
+            pub order: u32,
+            /// The normal color.
+            pub normal: AnsiColor,
+            /// The bright color.
+            pub bright: AnsiColor,
+        }
+
+        /// A single ANSI color.
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+        pub struct AnsiColor {
+            /// The color represented as a six-digit hex string with a leading hash (#).
+            pub hex: Hex,
+            /// The color represented as individual red, green, and blue channels.
+            pub rgb: Rgb,
+            /// The color represented as individual hue, saturation, and lightness channels.
+            pub hsl: Hsl,
+            /// The color's ANSI code.
+            pub code: u8,
+        }
+    }
+}
+
 fn make_flavor_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
     let items = colors_in_order(sample_flavor).map(|(identifier, _)| {
         let ident = format_ident!("{identifier}");
@@ -196,46 +238,6 @@ fn make_flavor_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
                     #(#items),*
                 ]
             }
-        }
-    }
-}
-
-fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
-    let colors = ansi_colors_in_order(sample_flavor).map(|(k, _)| {
-        let ident = format_ident!("{k}");
-        quote! {
-            /// The normal and bright #ident ANSI color pair.
-            pub #ident: AnsiColorPair
-        }
-    });
-    quote! {
-        /// All of the ANSI colors for a particular flavor of Catppuccin.
-        /// Obtained via [`Flavor::ansi_colors`].
-        #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-        pub struct FlavorAnsiColors {
-            #(#colors),*
-        }
-
-        /// A pair of ANSI colors - normal and bright.
-        /// TODO: Add name into here 
-        #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-        pub struct AnsiColorPair {
-            /// The normal color.
-            pub normal: AnsiColor,
-            /// The bright color.
-            pub bright: AnsiColor,
-        }
-
-        /// A single ANSI color.
-        #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-        pub struct AnsiColor {
-            /// The color represented as a six-digit hex string with a leading hash (#).
-            pub hex: Hex,
-            /// The color's ANSI code.
-            pub code: u8,
         }
     }
 }
@@ -450,7 +452,7 @@ fn make_ansi_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
             /// Example:
             ///
             /// ```rust
-            /// let black = catppuccin::PALETTE.latte.ansi_colors.normal.black;
+            /// let black = catppuccin::PALETTE.latte.ansi_colors.black;
             /// assert_eq!(black.name.to_string(), "Black");
             /// assert_eq!(black.name.identifier(), "black");
             /// ```
@@ -578,46 +580,66 @@ fn make_color_entry(identifier: &str, color: &Color) -> TokenStream {
 fn make_ansi_color_entry(identifier: &str, ansi_color_pair: &AnsiColorPair) -> TokenStream {
     let ident = format_ident!("{}", identifier);
     let AnsiColorPair {
-        normal: AnsiColor {
-            hex: normal_hex,
-            code: normal_code,
-        },
-        bright: AnsiColor {
-            hex: bright_hex,
-            code: bright_code,
-        },
+        name,
+        order,
+        normal:
+            AnsiColor {
+                code: normal_code,
+                rgb:
+                    Rgb {
+                        r: normal_r,
+                        g: normal_g,
+                        b: normal_b,
+                    },
+                hsl:
+                    Hsl {
+                        h: normal_h,
+                        s: normal_s,
+                        l: normal_l,
+                    },
+                ..
+            },
+        bright:
+            AnsiColor {
+                code: bright_code,
+                rgb:
+                    Rgb {
+                        r: bright_r,
+                        g: bright_g,
+                        b: bright_b,
+                    },
+                hsl:
+                    Hsl {
+                        h: bright_h,
+                        s: bright_s,
+                        l: bright_l,
+                    },
+                ..
+            },
     } = ansi_color_pair;
 
-    // we don't get RGB from the palette json for ansi colours, so we have to
-    // parse the hex string into an RGB and then wrap that in Hex(...)
-    let (normal_r, normal_g, normal_b) = parse_hex_string(normal_hex);
-    let (bright_r, bright_g, bright_b) = parse_hex_string(bright_hex);
-
-    let normal_hex = quote! { Hex(Rgb { r: #normal_r, g: #normal_g, b: #normal_b }) };
-    let bright_hex = quote! { Hex(Rgb { r: #bright_r, g: #bright_g, b: #bright_b }) };
+    let ansi_name_variant = format_ident!("{}", name);
+    let normal_rgb = quote! { Rgb { r: #normal_r, g: #normal_g, b: #normal_b } };
+    let normal_hsl = quote! { Hsl { h: #normal_h, s: #normal_s, l: #normal_l } };
+    let bright_rgb = quote! { Rgb { r: #bright_r, g: #bright_g, b: #bright_b } };
+    let bright_hsl = quote! { Hsl { h: #bright_h, s: #bright_s, l: #bright_l } };
 
     quote! {
         #ident: AnsiColorPair {
+            name: AnsiColorName::#ansi_name_variant,
+            order: #order,
             normal: AnsiColor {
-                hex: #normal_hex,
+                hex: Hex(#normal_rgb),
+                rgb: #normal_rgb,
+                hsl: #normal_hsl,
                 code: #normal_code,
             },
             bright: AnsiColor {
-                hex: #bright_hex,
+                hex: Hex(#bright_rgb),
+                rgb: #bright_rgb,
+                hsl: #bright_hsl,
                 code: #bright_code,
             }
         }
     }
-}
-
-fn parse_hex_string(hex: &str) -> (u8, u8, u8) {
-    let hex = hex
-        .strip_prefix('#')
-        .expect("hex string should start with #");
-    let hex = u32::from_str_radix(hex, 16).expect("hex string should be valid hexadecimal");
-    (
-        ((hex >> 16) & 0xff) as u8,
-        ((hex >> 8) & 0xff) as u8,
-        (hex & 0xff) as u8,
-    )
 }
