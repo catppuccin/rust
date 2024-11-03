@@ -65,9 +65,9 @@ struct AnsiColorPair {
     bright: AnsiColor,
 }
 
-// TODO: pull in the name of the group here (i.e. "Normal" or "Bright")
 #[derive(Debug, Deserialize)]
 struct AnsiColor {
+    name: String,
     rgb: Rgb,
     hsl: Hsl,
     code: u8,
@@ -89,18 +89,25 @@ fn main() -> Result<(), Box<dyn Error>> {
     let tokens = [
         make_flavor_colors_struct(sample_flavor),
         make_flavor_colors_all_impl(sample_flavor),
+        make_flavor_ansi_colors_struct(sample_flavor),
+        make_flavor_ansi_colors_all_impl(sample_flavor),
+
         make_color_name_enum(sample_flavor),
         make_color_name_index_impl(sample_flavor),
         make_color_name_display_impl(sample_flavor),
         make_color_name_identifier_impl(sample_flavor),
         make_color_name_fromstr_impl_tokens(sample_flavor),
-        make_flavor_ansi_colors_struct(sample_flavor),
-        make_flavor_ansi_colors_all_impl(sample_flavor),
+
+        make_ansi_color_pair_name_enum(sample_flavor),
+        make_ansi_color_pair_name_index_impl(sample_flavor),
+        make_ansi_color_pair_name_display_impl(sample_flavor),
+        make_ansi_color_pair_name_identifier_impl(sample_flavor),
+        make_ansi_color_pair_name_fromstr_impl_tokens(sample_flavor),
+
+        // TODO: Implement the same methods as `ansi_color_pair`
         make_ansi_color_name_enum(sample_flavor),
-        make_ansi_color_name_index_impl(sample_flavor),
         make_ansi_color_name_display_impl(sample_flavor),
-        make_ansi_color_name_identifier_impl(sample_flavor),
-        make_ansi_color_name_fromstr_impl_tokens(sample_flavor),
+
         make_palette_const(&palette),
     ];
     let ast = syn::parse2(tokens.into_iter().collect())?;
@@ -110,6 +117,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// NOTE: This currently produces incorrect URLs as we need to duplicate some palette circles and put them in a consistent format before we can get all the normal and bright colour circles
 fn color_img(filename: &str) -> String {
     format!(
         r#"<img width="23" height="23" src="https://raw.githubusercontent.com/catppuccin/catppuccin/3d687b3d60e80f1991ef1ea5223b18225e802ebb/assets/palette/circles/{filename}.png">"#
@@ -199,8 +207,8 @@ fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
         #[derive(Clone, Copy, Debug, PartialEq)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct AnsiColorPair {
-            /// The [`AnsiColorName`] for this color.
-            pub name: AnsiColorName,
+            /// The [`AnsiColorPairName`] for this color.
+            pub name: AnsiColorPairName,
             /// Order of the ANSI color in the palette spec.
             pub order: u32,
             /// The normal color.
@@ -213,6 +221,8 @@ fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
         #[derive(Clone, Copy, Debug, PartialEq)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct AnsiColor {
+            /// The [`AnsiColorName`] for this color.
+            pub name: AnsiColorName,
             /// The color represented as a six-digit hex string with a leading hash (#).
             pub hex: Hex,
             /// The color represented as individual red, green, and blue channels.
@@ -280,7 +290,7 @@ fn make_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_pair_name_enum(sample_flavor: &Flavor) -> TokenStream {
     let variants = ansi_colors_in_order(sample_flavor).map(|(name, _)| {
         let ident = format_ident!("{}", titlecase(name));
         let color_imgs = format!(" {}", ansi_color_imgs(name));
@@ -291,6 +301,35 @@ fn make_ansi_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
     });
     quote! {
         /// Enum of all ANSI Catppuccin colors. Can be used to index into a [`FlavorAnsiColors`].
+        #[derive(Copy, Clone, Eq, PartialEq, Debug)]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+        pub enum AnsiColorPairName {
+            #(#variants),*
+        }
+    }
+}
+
+fn make_ansi_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
+    fn enum_variant(color_pair: &AnsiColor) -> TokenStream {
+        let name = &color_pair.name.replace(" ", "");
+        let ident = format_ident!("{}", name);
+        let color_imgs = format!(" {}", ansi_color_imgs(name));
+        quote! {
+            #[doc = #color_imgs]
+            #ident
+        }
+    }
+    let variants = ansi_colors_in_order(sample_flavor).map(|(_, color_pair)| {
+        let normal_variants = enum_variant(&color_pair.normal);
+        let bright_variants = enum_variant(&color_pair.bright);
+        quote! {
+            #normal_variants,
+            #bright_variants
+        }
+    });
+
+    quote! {
+        /// Enum of all ANSI Catppuccin colors.
         #[derive(Copy, Clone, Eq, PartialEq, Debug)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub enum AnsiColorName {
@@ -334,20 +373,20 @@ fn make_color_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_pair_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
     let first = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
         let variant = format_ident!("{}", titlecase(identifier));
         let ident = format_ident!("{}", identifier);
         quote! {
-            AnsiColorName::#variant => &self.#ident
+            AnsiColorPairName::#variant => &self.#ident
         }
     });
     let second = first.clone();
     quote! {
-        impl Index<AnsiColorName> for FlavorAnsiColors {
+        impl Index<AnsiColorPairName> for FlavorAnsiColors {
             type Output = AnsiColorPair;
 
-            fn index(&self, index: AnsiColorName) -> &Self::Output {
+            fn index(&self, index: AnsiColorPairName) -> &Self::Output {
                 match index {
                     #(#first),*
                 }
@@ -360,7 +399,7 @@ fn make_ansi_color_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
             /// This is equivalent to using the index operator, but can also be used in
             /// const contexts.
             #[must_use]
-            pub const fn get_ansi_color(&self, name: AnsiColorName) -> &AnsiColorPair {
+            pub const fn get_ansi_color(&self, name: AnsiColorPairName) -> &AnsiColorPair {
                 match name {
                     #(#second),*
                 }
@@ -388,12 +427,39 @@ fn make_color_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_pair_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
         let name = titlecase(identifier);
         let variant = format_ident!("{name}");
         quote! {
             Self::#variant => write!(f, #name)
+        }
+    });
+    quote! {
+        impl std::fmt::Display for AnsiColorPairName {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                match self {
+                    #(#match_arms),*
+                }
+            }
+        }
+    }
+}
+
+fn make_ansi_color_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
+    fn match_arm(color_pair: &AnsiColor) -> TokenStream {
+        let name = &color_pair.name;
+        let variant = format_ident!("{}", name.replace(" ", ""));
+        quote! {
+            Self::#variant => write!(f, #name)
+        }
+    }
+    let match_arms = ansi_colors_in_order(sample_flavor).map(|(_, color_pair)| {
+        let normal_variants = match_arm(&color_pair.normal);
+        let bright_variants = match_arm(&color_pair.bright);
+        quote! {
+            #normal_variants,
+            #bright_variants
         }
     });
     quote! {
@@ -437,7 +503,7 @@ fn make_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_pair_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
         let variant = format_ident!("{}", titlecase(identifier));
         quote! {
@@ -445,7 +511,7 @@ fn make_ansi_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
         }
     });
     quote! {
-        impl AnsiColorName {
+        impl AnsiColorPairName {
             /// Get the ANSI color's identifier; the lowercase key used to identify the color.
             /// This differs from `to_string` in that it's intended for machine usage
             /// rather than presentation.
@@ -490,7 +556,7 @@ fn make_color_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_pair_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = ansi_colors_in_order(sample_flavor)
         .map(|(identifier, _)| {
             let variant = format_ident!("{}", titlecase(identifier));
@@ -500,7 +566,7 @@ fn make_ansi_color_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStre
         })
         .collect::<Vec<_>>();
     quote! {
-        impl std::str::FromStr for AnsiColorName {
+        impl std::str::FromStr for AnsiColorPairName {
             type Err = ParseColorNameError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -585,6 +651,7 @@ fn make_ansi_color_entry(identifier: &str, ansi_color_pair: &AnsiColorPair) -> T
         order,
         normal:
             AnsiColor {
+                name: normal_name,
                 code: normal_code,
                 rgb:
                     Rgb {
@@ -598,10 +665,10 @@ fn make_ansi_color_entry(identifier: &str, ansi_color_pair: &AnsiColorPair) -> T
                         s: normal_s,
                         l: normal_l,
                     },
-                ..
             },
         bright:
             AnsiColor {
+                name: bright_name,
                 code: bright_code,
                 rgb:
                     Rgb {
@@ -620,6 +687,8 @@ fn make_ansi_color_entry(identifier: &str, ansi_color_pair: &AnsiColorPair) -> T
     } = ansi_color_pair;
 
     let ansi_name_variant = format_ident!("{}", name);
+    let normal_name_variant = format_ident!("{}", normal_name);
+    let bright_name_variant = format_ident!("{}", bright_name.replace(" ", ""));
     let normal_rgb = quote! { Rgb { r: #normal_r, g: #normal_g, b: #normal_b } };
     let normal_hsl = quote! { Hsl { h: #normal_h, s: #normal_s, l: #normal_l } };
     let bright_rgb = quote! { Rgb { r: #bright_r, g: #bright_g, b: #bright_b } };
@@ -627,15 +696,17 @@ fn make_ansi_color_entry(identifier: &str, ansi_color_pair: &AnsiColorPair) -> T
 
     quote! {
         #ident: AnsiColorPair {
-            name: AnsiColorName::#ansi_name_variant,
+            name: AnsiColorPairName::#ansi_name_variant,
             order: #order,
             normal: AnsiColor {
+                name: AnsiColorName::#normal_name_variant,
                 hex: Hex(#normal_rgb),
                 rgb: #normal_rgb,
                 hsl: #normal_hsl,
                 code: #normal_code,
             },
             bright: AnsiColor {
+                name: AnsiColorName::#bright_name_variant,
                 hex: Hex(#bright_rgb),
                 rgb: #bright_rgb,
                 hsl: #bright_hsl,

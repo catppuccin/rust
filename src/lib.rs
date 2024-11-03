@@ -503,24 +503,48 @@ impl From<(f64, f64, f64)> for Hsl {
 }
 
 #[cfg(feature = "css-colors")]
-impl From<Color> for css_colors::RGB {
-    fn from(value: Color) -> Self {
-        Self {
-            r: css_colors::Ratio::from_u8(value.rgb.r),
-            g: css_colors::Ratio::from_u8(value.rgb.g),
-            b: css_colors::Ratio::from_u8(value.rgb.b),
+mod css_colors {
+    use crate::{AnsiColor, Color};
+
+    impl From<Color> for css_colors::RGB {
+        fn from(value: Color) -> Self {
+            Self {
+                r: css_colors::Ratio::from_u8(value.rgb.r),
+                g: css_colors::Ratio::from_u8(value.rgb.g),
+                b: css_colors::Ratio::from_u8(value.rgb.b),
+            }
         }
     }
-}
 
-#[cfg(feature = "css-colors")]
-impl From<Color> for css_colors::HSL {
-    fn from(value: Color) -> Self {
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        Self {
-            h: css_colors::Angle::new(value.hsl.h as u16),
-            s: css_colors::Ratio::from_f32(value.hsl.s as f32),
-            l: css_colors::Ratio::from_f32(value.hsl.l as f32),
+    impl From<AnsiColor> for css_colors::RGB {
+        fn from(value: AnsiColor) -> Self {
+            Self {
+                r: css_colors::Ratio::from_u8(value.rgb.r),
+                g: css_colors::Ratio::from_u8(value.rgb.g),
+                b: css_colors::Ratio::from_u8(value.rgb.b),
+            }
+        }
+    }
+
+    impl From<Color> for css_colors::HSL {
+        fn from(value: Color) -> Self {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            Self {
+                h: css_colors::Angle::new(value.hsl.h as u16),
+                s: css_colors::Ratio::from_f32(value.hsl.s as f32),
+                l: css_colors::Ratio::from_f32(value.hsl.l as f32),
+            }
+        }
+    }
+
+    impl From<AnsiColor> for css_colors::HSL {
+        fn from(value: AnsiColor) -> Self {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            Self {
+                h: css_colors::Angle::new(value.hsl.h as u16),
+                s: css_colors::Ratio::from_f32(value.hsl.s as f32),
+                l: css_colors::Ratio::from_f32(value.hsl.l as f32),
+            }
         }
     }
 }
