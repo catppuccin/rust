@@ -41,4 +41,26 @@ fn main() {
             );
         }
     }
+
+    println!();
+
+    for mocha_ansi_color_pairs in &mocha.ansi_colors.all_pairs() {
+        for AnsiColor {
+            name,
+            rgb,
+            hsl,
+            code,
+            hex,
+        } in [mocha_ansi_color_pairs.normal, mocha_ansi_color_pairs.bright]
+        {
+            println!(
+                "Mocha ANSI [{:2}] {:15} →  {:6}  {:3?}  {:19?}",
+                code,
+                name.to_string(),
+                hex,
+                rgb,
+                hsl,
+            );
+        }
+    }
 }

@@ -306,9 +306,13 @@ fn make_flavor_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
 }
 
 fn make_flavor_ansi_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
-    let items = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
+    let ansi_colors = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
         let ident = format_ident!("{identifier}");
         quote! { &self.#ident }
+    });
+    let ansi_color_pairs = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, color_pair)| {
+        let entry = make_ansi_color_pair_entry(identifier, color_pair);
+        entry
     });
     quote! {
         impl FlavorAnsiColors {
@@ -316,8 +320,15 @@ fn make_flavor_ansi_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
             #[must_use]
             pub const fn all_ansi_colors(&self) -> [&AnsiColor; 16] {
                 [
-                    #(#items),*
+                    #(#ansi_colors),*
                 ]
+            }
+
+            #[must_use]
+            pub const fn to_ansi_color_pairs(&self) -> FlavorAnsiColorPairs {
+                FlavorAnsiColorPairs {
+                    #(#ansi_color_pairs),*
+                }
             }
         }
     }
