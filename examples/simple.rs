@@ -1,5 +1,5 @@
 //! Simple example showing how to get colors from the Catppuccin palette.
-use catppuccin::{AnsiColor, AnsiColorName, ColorName, Rgb, PALETTE};
+use catppuccin::{AnsiColor, ColorName, Rgb, PALETTE};
 
 fn main() {
     let latte_teal = PALETTE.latte.colors.teal;
@@ -22,18 +22,22 @@ fn main() {
 
     println!("Mocha's {} is {}", mocha_mauve.name, mocha_mauve.hex);
 
-    for mocha_ansi_color_pairs in &mocha.ansi_colors {
-        for AnsiColor {
-            name,
-            rgb,
-            hsl,
-            code,
-            hex,
-        } in [mocha_ansi_color_pairs.normal, mocha_ansi_color_pairs.bright]
+    for AnsiColor {
+        name,
+        rgb,
+        hsl,
+        code,
+        hex,
+    } in &mocha.ansi_colors
+    {
         {
             println!(
                 "Mocha ANSI [{:2}] {:15} →  {:6}  {:3?}  {:19?}",
-                code, name.to_string(), hex, rgb, hsl,
+                code,
+                name.to_string(),
+                hex,
+                rgb,
+                hsl,
             );
         }
     }

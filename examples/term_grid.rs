@@ -53,26 +53,24 @@ fn main() {
                 .paint(format!("{} ANSI", flavor.name))
         );
 
-        for ansi_color_pair in &flavor.ansi_colors {
-            for ansi_color in [ansi_color_pair.normal, ansi_color_pair.bright] {
-                let rgb = format!(
-                    "rgb({:3}, {:3}, {:3})",
-                    ansi_color.rgb.r, ansi_color.rgb.g, ansi_color.rgb.b
-                );
-                let hsl = format!(
-                    "hsl({:3.0}, {:5.3}, {:5.3})",
-                    ansi_color.hsl.h, ansi_color.hsl.s, ansi_color.hsl.l
-                );
+        for ansi_color in &flavor.ansi_colors {
+            let rgb = format!(
+                "rgb({:3}, {:3}, {:3})",
+                ansi_color.rgb.r, ansi_color.rgb.g, ansi_color.rgb.b
+            );
+            let hsl = format!(
+                "hsl({:3.0}, {:5.3}, {:5.3})",
+                ansi_color.hsl.h, ansi_color.hsl.s, ansi_color.hsl.l
+            );
 
-                println!(
-                    "{} {:18} →  {:6}  {:18}  {:18}",
-                    ansi_term_ansi_color(&ansi_color).reverse().paint("  "),
-                    ansi_color.name.to_string(),
-                    ansi_color.hex,
-                    rgb,
-                    hsl,
-                );
-            }
+            println!(
+                "{} {:15} →  {:6}  {:18}  {:18}",
+                ansi_term_ansi_color(&ansi_color).reverse().paint("  "),
+                ansi_color.name.to_string(),
+                ansi_color.hex,
+                rgb,
+                hsl,
+            );
         }
 
         println!();

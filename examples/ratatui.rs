@@ -31,12 +31,14 @@ fn main() -> io::Result<()> {
             let ansi_normals: Vec<Span> = flavor
                 .ansi_colors
                 .into_iter()
-                .map(|c| "██".fg(c.normal)) // fg accepts any type that implements Into<Color>
+                .filter(|c| c.code < 8)
+                .map(|c| "██".fg(*c)) // fg accepts any type that implements Into<Color>
                 .collect::<Vec<Span>>();
             let ansi_brights: Vec<Span> = flavor
                 .ansi_colors
                 .into_iter()
-                .map(|c| "██".fg(c.bright)) // fg accepts any type that implements Into<Color>
+                .filter(|c| c.code >= 8)
+                .map(|c| "██".fg(*c)) // fg accepts any type that implements Into<Color>
                 .collect::<Vec<Span>>();
 
             let width = buf.area.width;

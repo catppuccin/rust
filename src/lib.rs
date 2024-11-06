@@ -182,11 +182,19 @@ pub struct ColorIterator<'a> {
 }
 
 /// An iterator over the ANSI colors in a flavor.
-/// Obtained via [`FlavorAnsiColors::iter()`].
+/// Obtained via [`FlavorAnsiColors::into_iter()`](struct.FlavorAnsiColors.html#method.into_iter) or [`FlavorAnsiColors::iter()`].
 pub struct AnsiColorIterator<'a> {
     ansi_colors: &'a FlavorAnsiColors,
     current: usize,
 }
+
+/// TODO: Figure out how to expose this iterator in the public API
+/// An iterator over the ANSI color pairs in a flavor.
+/// Obtained via [`FlavorAnsiColorPairs::into_iter()`](struct.FlavorAnsiColorPairs.html#method.into_iter) or [`FlavorAnsiColorPairs::iter()`].
+// pub struct AnsiColorPairsIterator<'a> {
+//     ansi_pair_colors: &'a FlavorAnsiColorPairs,
+//     current: usize,
+// }
 
 impl Palette {
     /// Get an array of the flavors in the palette.
@@ -345,13 +353,18 @@ impl FlavorColors {
 }
 
 impl FlavorAnsiColors {
-    /// Create an iterator over the colors in the flavor.
+    /// Create an iterator over the ANSI colors in the flavor.
     #[must_use]
     pub const fn iter(&self) -> AnsiColorIterator {
         AnsiColorIterator {
             ansi_colors: self,
             current: 0,
         }
+    }
+
+    /// Analogous to calling [`FlavorAnsiColors::iter()`]
+    pub const fn all(&self) -> AnsiColorIterator {
+        self.iter()
     }
 }
 
@@ -366,15 +379,6 @@ impl<'a> Iterator for FlavorIterator<'a> {
             self.current += 1;
             Some(flavor)
         }
-    }
-}
-
-impl<'a> IntoIterator for &'a Palette {
-    type Item = &'a Flavor;
-    type IntoIter = FlavorIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
     }
 }
 
@@ -393,7 +397,7 @@ impl<'a> Iterator for ColorIterator<'a> {
 }
 
 impl<'a> Iterator for AnsiColorIterator<'a> {
-    type Item = &'a AnsiColorPair;
+    type Item = &'a AnsiColor;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current >= self.ansi_colors.all_ansi_colors().len() {
@@ -403,6 +407,29 @@ impl<'a> Iterator for AnsiColorIterator<'a> {
             self.current += 1;
             Some(color)
         }
+    }
+}
+
+// impl<'a> Iterator for AnsiColorPairsIterator<'a> {
+//     type Item = &'a AnsiColorPair;
+
+//     fn next(&mut self) -> Option<Self::Item> {
+//         if self.current >= self.ansi_pair_colors.all_ansi_color_pairs().len() {
+//             None
+//         } else {
+//             let color = self.ansi_pair_colors.all_ansi_color_pairs()[self.current];
+//             self.current += 1;
+//             Some(color)
+//         }
+//     }
+// }
+
+impl<'a> IntoIterator for &'a Palette {
+    type Item = &'a Flavor;
+    type IntoIter = FlavorIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 
@@ -416,13 +443,22 @@ impl<'a> IntoIterator for &'a FlavorColors {
 }
 
 impl<'a> IntoIterator for &'a FlavorAnsiColors {
-    type Item = &'a AnsiColorPair;
+    type Item = &'a AnsiColor;
     type IntoIter = AnsiColorIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
+
+// impl<'a> IntoIterator for &'a FlavorAnsiColorPairs {
+//     type Item = &'a AnsiColorPair;
+//     type IntoIter = AnsiColorPairsIterator<'a>;
+
+//     fn into_iter(self) -> Self::IntoIter {
+//         self.iter()
+//     }
+// }
 
 impl Flavor {
     /// Create an iterator over the colors in the flavor.
