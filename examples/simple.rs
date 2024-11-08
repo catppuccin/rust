@@ -22,6 +22,7 @@ fn main() {
 
     println!("Mocha's {} is {}", mocha_mauve.name, mocha_mauve.hex);
 
+    // iterate over the 16 ANSI colors (i.e. Black, Red, ..., Bright Black, Bright Red, ...)
     for AnsiColor {
         name,
         rgb,
@@ -44,6 +45,7 @@ fn main() {
 
     println!();
 
+    // iterate over the ansi colors in pairs (i.e. Black, Bright Black, Red, Bright Red, ...)
     for mocha_ansi_color_pairs in &mocha.ansi_colors.all_pairs() {
         for AnsiColor {
             name,

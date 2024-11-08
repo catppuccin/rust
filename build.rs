@@ -138,23 +138,22 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// NOTE: This currently produces incorrect URLs as we need to duplicate some palette circles and put them in a consistent format before we can get all the normal and bright colour circles
-fn color_img(filename: &str) -> String {
+fn palette_circle(filename: &str) -> String {
     format!(
-        r#"<img width="23" height="23" src="https://raw.githubusercontent.com/catppuccin/catppuccin/3d687b3d60e80f1991ef1ea5223b18225e802ebb/assets/palette/circles/{filename}.png">"#
+        r#"<img width="23" height="23" src="https://raw.githubusercontent.com/catppuccin/catppuccin/95aae3360eb88fc1b6a89398be08ec6deae0bc9a/assets/palette/circles/{filename}.png">"#
     )
 }
 
-fn color_imgs(color_key: &str) -> String {
+fn color_palette_circles(color_key: &str) -> String {
     ["latte", "frappe", "macchiato", "mocha"]
-        .map(|n| color_img(format!("{n}_{color_key}").as_str()))
+        .map(|n| palette_circle(format!("{n}_{color_key}").as_str()))
         .into_iter()
         .collect::<String>()
 }
 
-fn ansi_color_imgs(color_key: &str) -> String {
+fn ansi_color_palette_circles(color_key: &str) -> String {
     ["latte", "frappe", "macchiato", "mocha"]
-        .map(|n| color_img(format!("{n}_ansi_{color_key}").as_str()))
+        .map(|n| palette_circle(format!("ansi/{n}_ansi_{color_key}").as_str()))
         .into_iter()
         .collect::<String>()
 }
@@ -203,7 +202,7 @@ fn ansi_colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(String, &AnsiCol
 fn make_flavor_colors_struct(sample_flavor: &Flavor) -> TokenStream {
     let colors = colors_in_order(sample_flavor).map(|(k, _)| {
         let ident = format_ident!("{k}");
-        let color_img = format!(" {}", color_imgs(k));
+        let color_img = format!(" {}", color_palette_circles(k));
         quote! {
             #[doc = #color_img]
             pub #ident: Color
@@ -322,7 +321,7 @@ fn make_flavor_ansi_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
                 ]
             }
 
-            ///
+            /// Convert the 16 ANSI colors to 8 ANSI color pairs.
             #[must_use]
             pub const fn to_ansi_color_pairs(&self) -> FlavorAnsiColorPairs {
                 FlavorAnsiColorPairs {
@@ -354,9 +353,9 @@ fn make_flavor_ansi_color_pairs_all_impl(sample_flavor: &Flavor) -> TokenStream 
 fn make_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
     let variants = colors_in_order(sample_flavor).map(|(name, _)| {
         let ident = format_ident!("{}", titlecase(name));
-        let color_imgs = format!(" {}", color_imgs(name));
+        let circles = format!(" {}", color_palette_circles(name));
         quote! {
-            #[doc = #color_imgs]
+            #[doc = #circles]
             #ident
         }
     });
@@ -374,14 +373,14 @@ fn make_ansi_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
     let variants = ansi_colors_in_order(sample_flavor).map(|(identifier, color)| {
         let name = remove_whitespace(&color.name);
         let ident = format_ident!("{name}");
-        let color_imgs = format!(" {}", ansi_color_imgs(&identifier));
+        let circles = format!(" {}", ansi_color_palette_circles(&identifier));
         quote! {
-            #[doc = #color_imgs]
+            #[doc = #circles]
             #ident
         }
     });
     quote! {
-        /// Enum of all ANSI Catppuccin colors.
+        /// Enum of all named ANSI colors. Can be used to index into a [`FlavorAnsiColors`]
         #[derive(Copy, Clone, Eq, PartialEq, Debug)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub enum AnsiColorName {
@@ -393,14 +392,14 @@ fn make_ansi_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
 fn make_ansi_color_pair_name_enum(sample_flavor: &Flavor) -> TokenStream {
     let variants = ansi_color_pairs_in_order(sample_flavor).map(|(name, _)| {
         let ident = format_ident!("{}", titlecase(name));
-        let color_imgs = format!(" {}", ansi_color_imgs(name));
+        let circles = format!(" {}", ansi_color_palette_circles(name));
         quote! {
-            #[doc = #color_imgs]
+            #[doc = #circles]
             #ident
         }
     });
     quote! {
-        /// Enum of all ANSI Catppuccin colors. Can be used to index into a [`FlavorAnsiColorPairs`].
+        /// Enum of all ANSI color pairs. Can be used to index into a [`FlavorAnsiColorPairs`].
         #[derive(Copy, Clone, Eq, PartialEq, Debug)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub enum AnsiColorPairName {
@@ -646,8 +645,14 @@ fn make_ansi_color_pair_name_identifier_impl(sample_flavor: &Flavor) -> TokenStr
             ///
             /// Example:
             ///
-            /// TODO:
             /// ```rust
+            /// let black_ansi_pair = catppuccin::PALETTE.latte.ansi_colors.all_pairs().black;
+            /// assert_eq!(black_ansi_pair.name.to_string(), "Black");
+            /// assert_eq!(black_ansi_pair.name.identifier(), "black");
+            /// assert_eq!(black_ansi_pair.normal.name.to_string(), "Black");
+            /// assert_eq!(black_ansi_pair.normal.name.identifier(), "black");
+            /// assert_eq!(black_ansi_pair.bright.name.to_string(), "Bright Black");
+            /// assert_eq!(black_ansi_pair.bright.name.identifier(), "bright_black");
             /// ```
             #[must_use]
             pub const fn identifier(&self) -> &'static str {
