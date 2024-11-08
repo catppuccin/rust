@@ -45,7 +45,7 @@ fn main() {
 
     println!();
 
-    // iterate over the ansi colors in pairs (i.e. Black, Bright Black, Red, Bright Red, ...)
+    // iterate over the 16 ANSI colors in 8 pairs (i.e. Black, Bright Black, Red, Bright Red, ...)
     for mocha_ansi_color_pairs in &mocha.ansi_colors.all_pairs() {
         for AnsiColor {
             name,
