@@ -170,12 +170,30 @@ pub struct Flavor {
     pub dark: bool,
     /// The colors in the flavor.
     pub colors: FlavorColors,
+    /// The ANSI colors in the flavor.
+    pub ansi_colors: FlavorAnsiColors,
 }
 
 /// An iterator over colors in a flavor.
 /// Obtained via [`Flavor::into_iter()`](struct.Flavor.html#method.into_iter) or [`FlavorColors::iter()`].
 pub struct ColorIterator<'a> {
     colors: &'a FlavorColors,
+    current: usize,
+}
+
+/// An iterator over the ANSI colors in a flavor.
+///
+/// Defaults to ascending order by ANSI code 0 -> 16.
+/// Obtained via [`FlavorAnsiColors::into_iter()`](struct.FlavorAnsiColors.html#method.into_iter) or [`FlavorAnsiColors::iter()`].
+pub struct AnsiColorIterator<'a> {
+    ansi_colors: &'a FlavorAnsiColors,
+    current: usize,
+}
+
+/// An iterator over the ANSI color pairs in a flavor.
+/// Obtained via [`FlavorAnsiColorPairs::into_iter()`](struct.FlavorAnsiColorPairs.html#method.into_iter) or [`FlavorAnsiColorPairs::iter()`].
+pub struct AnsiColorPairsIterator<'a> {
+    ansi_color_pairs: &'a FlavorAnsiColorPairs,
     current: usize,
 }
 
@@ -335,6 +353,34 @@ impl FlavorColors {
     }
 }
 
+impl FlavorAnsiColors {
+    /// Create an iterator over the ANSI colors in the flavor.
+    #[must_use]
+    pub const fn iter(&self) -> AnsiColorIterator {
+        AnsiColorIterator {
+            ansi_colors: self,
+            current: 0,
+        }
+    }
+
+    /// Get the ANSI color pairs
+    #[must_use]
+    pub const fn all_pairs(&self) -> FlavorAnsiColorPairs {
+        self.to_ansi_color_pairs()
+    }
+}
+
+impl FlavorAnsiColorPairs {
+    /// Create an iterator over the ANSI color pairs in the flavor.
+    #[must_use]
+    pub const fn iter(&self) -> AnsiColorPairsIterator {
+        AnsiColorPairsIterator {
+            ansi_color_pairs: self,
+            current: 0,
+        }
+    }
+}
+
 impl<'a> Iterator for FlavorIterator<'a> {
     type Item = &'a Flavor;
 
@@ -346,15 +392,6 @@ impl<'a> Iterator for FlavorIterator<'a> {
             self.current += 1;
             Some(flavor)
         }
-    }
-}
-
-impl<'a> IntoIterator for &'a Palette {
-    type Item = &'a Flavor;
-    type IntoIter = FlavorIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
     }
 }
 
@@ -372,9 +409,64 @@ impl<'a> Iterator for ColorIterator<'a> {
     }
 }
 
+impl<'a> Iterator for AnsiColorIterator<'a> {
+    type Item = &'a AnsiColor;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current >= self.ansi_colors.all_ansi_colors().len() {
+            None
+        } else {
+            let color = self.ansi_colors.all_ansi_colors()[self.current];
+            self.current += 1;
+            Some(color)
+        }
+    }
+}
+
+impl<'a> Iterator for AnsiColorPairsIterator<'a> {
+    type Item = &'a AnsiColorPair;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current >= self.ansi_color_pairs.all_ansi_color_pairs().len() {
+            None
+        } else {
+            let color = self.ansi_color_pairs.all_ansi_color_pairs()[self.current];
+            self.current += 1;
+            Some(color)
+        }
+    }
+}
+
+impl<'a> IntoIterator for &'a Palette {
+    type Item = &'a Flavor;
+    type IntoIter = FlavorIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 impl<'a> IntoIterator for &'a FlavorColors {
     type Item = &'a Color;
     type IntoIter = ColorIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a FlavorAnsiColors {
+    type Item = &'a AnsiColor;
+    type IntoIter = AnsiColorIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a FlavorAnsiColorPairs {
+    type Item = &'a AnsiColorPair;
+    type IntoIter = AnsiColorPairsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -460,46 +552,98 @@ impl From<(f64, f64, f64)> for Hsl {
 }
 
 #[cfg(feature = "css-colors")]
-impl From<Color> for css_colors::RGB {
-    fn from(value: Color) -> Self {
-        Self {
-            r: css_colors::Ratio::from_u8(value.rgb.r),
-            g: css_colors::Ratio::from_u8(value.rgb.g),
-            b: css_colors::Ratio::from_u8(value.rgb.b),
+mod css_colors {
+    use crate::{AnsiColor, Color};
+
+    impl From<Color> for css_colors::RGB {
+        fn from(value: Color) -> Self {
+            Self {
+                r: css_colors::Ratio::from_u8(value.rgb.r),
+                g: css_colors::Ratio::from_u8(value.rgb.g),
+                b: css_colors::Ratio::from_u8(value.rgb.b),
+            }
         }
     }
-}
 
-#[cfg(feature = "css-colors")]
-impl From<Color> for css_colors::HSL {
-    fn from(value: Color) -> Self {
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        Self {
-            h: css_colors::Angle::new(value.hsl.h as u16),
-            s: css_colors::Ratio::from_f32(value.hsl.s as f32),
-            l: css_colors::Ratio::from_f32(value.hsl.l as f32),
+    impl From<AnsiColor> for css_colors::RGB {
+        fn from(value: AnsiColor) -> Self {
+            Self {
+                r: css_colors::Ratio::from_u8(value.rgb.r),
+                g: css_colors::Ratio::from_u8(value.rgb.g),
+                b: css_colors::Ratio::from_u8(value.rgb.b),
+            }
+        }
+    }
+
+    impl From<Color> for css_colors::HSL {
+        fn from(value: Color) -> Self {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            Self {
+                h: css_colors::Angle::new(value.hsl.h as u16),
+                s: css_colors::Ratio::from_f32(value.hsl.s as f32),
+                l: css_colors::Ratio::from_f32(value.hsl.l as f32),
+            }
+        }
+    }
+
+    impl From<AnsiColor> for css_colors::HSL {
+        fn from(value: AnsiColor) -> Self {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            Self {
+                h: css_colors::Angle::new(value.hsl.h as u16),
+                s: css_colors::Ratio::from_f32(value.hsl.s as f32),
+                l: css_colors::Ratio::from_f32(value.hsl.l as f32),
+            }
         }
     }
 }
 
 #[cfg(feature = "ansi-term")]
-impl Color {
-    /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
-    pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
-        &self,
-        input: I,
-    ) -> ansi_term::ANSIGenericString<'a, S>
-    where
-        I: Into<std::borrow::Cow<'a, S>>,
-        <S as ToOwned>::Owned: core::fmt::Debug,
-    {
-        ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+mod ansi_term {
+    use crate::{AnsiColor, Color};
+
+    impl Color {
+        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
+            &self,
+            input: I,
+        ) -> ansi_term::ANSIGenericString<'a, S>
+        where
+            I: Into<std::borrow::Cow<'a, S>>,
+            <S as ToOwned>::Owned: core::fmt::Debug,
+        {
+            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+        }
+    }
+
+    impl AnsiColor {
+        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
+            &self,
+            input: I,
+        ) -> ansi_term::ANSIGenericString<'a, S>
+        where
+            I: Into<std::borrow::Cow<'a, S>>,
+            <S as ToOwned>::Owned: core::fmt::Debug,
+        {
+            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+        }
     }
 }
 
 #[cfg(feature = "ratatui")]
-impl From<Color> for ratatui::style::Color {
-    fn from(value: Color) -> Self {
-        Self::Rgb(value.rgb.r, value.rgb.g, value.rgb.b)
+mod ratatui {
+    use crate::{AnsiColor, Color};
+
+    impl From<Color> for ratatui::style::Color {
+        fn from(value: Color) -> Self {
+            Self::Rgb(value.rgb.r, value.rgb.g, value.rgb.b)
+        }
+    }
+
+    impl From<AnsiColor> for ratatui::style::Color {
+        fn from(value: AnsiColor) -> Self {
+            Self::Rgb(value.rgb.r, value.rgb.g, value.rgb.b)
+        }
     }
 }
