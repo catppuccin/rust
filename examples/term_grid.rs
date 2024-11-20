@@ -65,7 +65,7 @@ fn main() {
 
             println!(
                 "{} {:15} →  {:6}  {:18}  {:18}",
-                ansi_term_ansi_color(&ansi_color).reverse().paint("  "),
+                ansi_term_ansi_color(ansi_color).reverse().paint("  "),
                 ansi_color.name.to_string(),
                 ansi_color.hex,
                 rgb,

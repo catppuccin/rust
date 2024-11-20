@@ -166,7 +166,7 @@ fn titlecase<S: AsRef<str>>(s: S) -> String {
 }
 
 fn remove_whitespace(s: &str) -> String {
-    s.replace(" ", "")
+    s.replace(' ', "")
 }
 
 fn flavors_in_order(palette: &Palette) -> std::vec::IntoIter<(&String, &Flavor)> {
@@ -195,7 +195,7 @@ fn ansi_colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(String, &AnsiCol
         .ansi_colors
         .iter()
         .flat_map(|(_, c)| [&c.normal, &c.bright])
-        .map(|c| (c.name.to_lowercase().replace(" ", "_"), c))
+        .map(|c| (c.name.to_lowercase().replace(' ', "_"), c))
         .sorted_by(|(_, a), (_, b)| a.code.cmp(&b.code))
 }
 
@@ -220,15 +220,16 @@ fn make_flavor_colors_struct(sample_flavor: &Flavor) -> TokenStream {
 }
 
 fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
-    let colors = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
-        let ident = format_ident!("{identifier}");
+    let colors = ansi_colors_in_order(sample_flavor).map(|(k, _)| {
+        let ident = format_ident!("{k}");
+        let color_img = format!(" {}", ansi_color_palette_circles(&k));
         quote! {
-            /// The #ident ANSI color.
+            #[doc = #color_img]
             pub #ident: AnsiColor
         }
     });
     quote! {
-        /// All of the ANSI colors for a particular flavor of Catppuccin
+        /// All of the ANSI colors for a particular flavor of Catppuccin.
         /// Obtained via [`Flavor::ansi_colors`].
         #[derive(Clone, Copy, Debug, PartialEq)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -255,10 +256,11 @@ fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
 }
 
 fn make_flavor_ansi_color_pairs_struct(sample_flavor: &Flavor) -> TokenStream {
-    let color_pairs = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, _)| {
-        let ident = format_ident!("{identifier}");
+    let color_pairs = ansi_color_pairs_in_order(sample_flavor).map(|(k, _)| {
+        let ident = format_ident!("{k}");
+        let doc = format!("The normal and bright {k} ANSI color pair.");
         quote! {
-            /// The normal and bright #ident ANSI color pair.
+            #[doc = #doc]
             pub #ident: AnsiColorPair
         }
     });
@@ -323,6 +325,7 @@ fn make_flavor_ansi_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
 
             /// Convert the 16 ANSI colors to 8 ANSI color pairs.
             #[must_use]
+            #[allow(clippy::too_many_lines, clippy::unreadable_literal)]
             pub const fn to_ansi_color_pairs(&self) -> FlavorAnsiColorPairs {
                 FlavorAnsiColorPairs {
                     #(#ansi_color_pairs),*

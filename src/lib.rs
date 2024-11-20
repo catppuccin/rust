@@ -181,7 +181,9 @@ pub struct ColorIterator<'a> {
     current: usize,
 }
 
-/// An iterator over the ANSI colors in a flavor, defaults to ascending order by ANSI code 0 -> 16.
+/// An iterator over the ANSI colors in a flavor.
+///
+/// Defaults to ascending order by ANSI code 0 -> 16.
 /// Obtained via [`FlavorAnsiColors::into_iter()`](struct.FlavorAnsiColors.html#method.into_iter) or [`FlavorAnsiColors::iter()`].
 pub struct AnsiColorIterator<'a> {
     ansi_colors: &'a FlavorAnsiColors,
@@ -362,6 +364,7 @@ impl FlavorAnsiColors {
     }
 
     /// Get the ANSI color pairs
+    #[must_use]
     pub const fn all_pairs(&self) -> FlavorAnsiColorPairs {
         self.to_ansi_color_pairs()
     }
