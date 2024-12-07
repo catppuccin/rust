@@ -13,7 +13,7 @@ on:
 
 jobs:
   compile:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       RUST_BACKTRACE: 1
     steps:
@@ -27,7 +27,7 @@ jobs:
 
   rustfmt:
     name: rustfmt
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
