@@ -3,8 +3,12 @@ use std::io::{self, stdout};
 
 use catppuccin::PALETTE;
 use ratatui::{
-    prelude::*,
+    backend::CrosstermBackend,
+    layout::Rect,
+    style::Stylize as _,
+    text::{Line, Span},
     widgets::{Paragraph, Widget},
+    Terminal, TerminalOptions, Viewport,
 };
 
 fn main() -> io::Result<()> {
@@ -45,8 +49,7 @@ fn main() -> io::Result<()> {
             Paragraph::new(flavor.name.to_string()).render(Rect::new(0, 0, width, 1), buf);
             Paragraph::new(Line::from(analogous)).render(Rect::new(0, 1, width, 1), buf);
             Paragraph::new(Line::from(monochromatic)).render(Rect::new(0, 2, width, 1), buf);
-            Paragraph::new(format!("{} ANSI", flavor.name.to_string()))
-                .render(Rect::new(0, 4, width, 1), buf);
+            Paragraph::new(format!("{} ANSI", flavor.name)).render(Rect::new(0, 4, width, 1), buf);
             Paragraph::new(Line::from(ansi_normals)).render(Rect::new(0, 5, width, 1), buf);
             Paragraph::new(Line::from(ansi_brights)).render(Rect::new(0, 6, width, 1), buf);
         })?;
