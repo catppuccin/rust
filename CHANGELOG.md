@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0](https://github.com/catppuccin/rust/compare/v2.5.0-beta.0...v2.5.0) - 2025-02-20
+
+### Other
+
+- add changelog
+- replace publish workflow with release-plz
+- *(deps)* update rust crate itertools to 0.14.0 (#42)
+
 ### Changed
 
 - Replace publish workflow with release-plz
