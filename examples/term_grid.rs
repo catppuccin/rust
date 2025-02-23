@@ -72,7 +72,28 @@ fn main() {
                 hsl,
             );
         }
+        println!();
 
+        println!(
+            "{}\n",
+            ansi_term::Style::new()
+                .underline()
+                .bold()
+                .paint(format!("{} ANSI Pairs", flavor.name))
+        );
+
+        for ansi_color_pair in &flavor.ansi_colors.to_ansi_color_pairs() {
+            println!(
+                "{}{} {}",
+                ansi_term_ansi_color(&ansi_color_pair.normal)
+                    .reverse()
+                    .paint("  "),
+                ansi_term_ansi_color(&ansi_color_pair.bright)
+                    .reverse()
+                    .paint("  "),
+                ansi_color_pair.name,
+            );
+        }
         println!();
     }
 }

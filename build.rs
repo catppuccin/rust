@@ -88,37 +88,37 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let flavor_tokens = [
         // Colors
-        make_flavor_colors_struct(sample_flavor),
-        make_flavor_colors_all_impl(sample_flavor),
+        make_flavor_colors_struct_tokens(sample_flavor),
+        make_flavor_colors_all_impl_tokens(sample_flavor),
         // ANSI Colors
-        make_flavor_ansi_colors_struct(sample_flavor),
-        make_flavor_ansi_colors_all_impl(sample_flavor),
+        make_flavor_ansi_colors_struct_tokens(sample_flavor),
+        make_flavor_ansi_colors_all_impl_tokens(sample_flavor),
         // ANSI Color Pairs
-        make_flavor_ansi_color_pairs_struct(sample_flavor),
-        make_flavor_ansi_color_pairs_all_impl(sample_flavor),
+        make_flavor_ansi_color_pairs_struct_tokens(sample_flavor),
+        make_flavor_ansi_color_pairs_all_impl_tokens(sample_flavor),
     ];
     let color_tokens = [
-        make_color_name_enum(sample_flavor),
-        make_color_name_index_impl(sample_flavor),
-        make_color_name_display_impl(sample_flavor),
-        make_color_name_identifier_impl(sample_flavor),
+        make_color_name_enum_tokens(sample_flavor),
+        make_color_name_index_impl_tokens(sample_flavor),
+        make_color_name_display_impl_tokens(sample_flavor),
+        make_color_name_identifier_impl_tokens(sample_flavor),
         make_color_name_fromstr_impl_tokens(sample_flavor),
     ];
     let ansi_color_tokens = [
-        make_ansi_color_name_enum(sample_flavor),
-        make_ansi_color_name_index_impl(sample_flavor),
-        make_ansi_color_name_display_impl(sample_flavor),
-        make_ansi_color_name_identifier_impl(sample_flavor),
+        make_ansi_color_name_enum_tokens(sample_flavor),
+        make_ansi_color_name_index_impl_tokens(sample_flavor),
+        make_ansi_color_name_display_impl_tokens(sample_flavor),
+        make_ansi_color_name_identifier_impl_tokens(sample_flavor),
         make_ansi_color_name_fromstr_impl_tokens(sample_flavor),
     ];
     let ansi_color_pair_tokens = [
-        make_ansi_color_pair_name_enum(sample_flavor),
-        make_ansi_color_pair_name_index_impl(sample_flavor),
-        make_ansi_color_pair_name_display_impl(sample_flavor),
-        make_ansi_color_pair_name_identifier_impl(sample_flavor),
+        make_ansi_color_pair_name_enum_tokens(sample_flavor),
+        make_ansi_color_pair_name_index_impl_tokens(sample_flavor),
+        make_ansi_color_pair_name_display_impl_tokens(sample_flavor),
+        make_ansi_color_pair_name_identifier_impl_tokens(sample_flavor),
         make_ansi_color_pair_name_fromstr_impl_tokens(sample_flavor),
     ];
-    let palette_tokens = [make_palette_const(&palette)];
+    let palette_tokens = [make_palette_const_tokens(&palette)];
 
     let ast = syn::parse2(
         [
@@ -183,11 +183,21 @@ fn colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(&String, &Color)> {
         .sorted_by(|(_, a), (_, b)| a.order.cmp(&b.order))
 }
 
-fn ansi_color_pairs_in_order(flavor: &Flavor) -> std::vec::IntoIter<(&String, &AnsiColorPair)> {
+fn ansi_color_pairs_in_order(
+    flavor: &Flavor,
+) -> std::vec::IntoIter<(&String, &AnsiColorPair, String, String)> {
     flavor
         .ansi_colors
         .iter()
-        .sorted_by(|(_, a), (_, b)| a.order.cmp(&b.order))
+        .map(|(ident, pair)| {
+            (
+                ident,
+                pair,
+                pair.normal.name.to_lowercase().replace(' ', "_"),
+                pair.bright.name.to_lowercase().replace(' ', "_"),
+            )
+        })
+        .sorted_by(|(_, a, _, _), (_, b, _, _)| a.order.cmp(&b.order))
 }
 
 fn ansi_colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(String, &AnsiColor)> {
@@ -199,7 +209,7 @@ fn ansi_colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(String, &AnsiCol
         .sorted_by(|(_, a), (_, b)| a.code.cmp(&b.code))
 }
 
-fn make_flavor_colors_struct(sample_flavor: &Flavor) -> TokenStream {
+fn make_flavor_colors_struct_tokens(sample_flavor: &Flavor) -> TokenStream {
     let colors = colors_in_order(sample_flavor).map(|(k, _)| {
         let ident = format_ident!("{k}");
         let color_img = format!(" {}", color_palette_circles(k));
@@ -219,7 +229,7 @@ fn make_flavor_colors_struct(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
+fn make_flavor_ansi_colors_struct_tokens(sample_flavor: &Flavor) -> TokenStream {
     let colors = ansi_colors_in_order(sample_flavor).map(|(k, _)| {
         let ident = format_ident!("{k}");
         let color_img = format!(" {}", ansi_color_palette_circles(&k));
@@ -255,8 +265,8 @@ fn make_flavor_ansi_colors_struct(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_flavor_ansi_color_pairs_struct(sample_flavor: &Flavor) -> TokenStream {
-    let color_pairs = ansi_color_pairs_in_order(sample_flavor).map(|(k, _)| {
+fn make_flavor_ansi_color_pairs_struct_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let color_pairs = ansi_color_pairs_in_order(sample_flavor).map(|(k, ..)| {
         let ident = format_ident!("{k}");
         let doc = format!("The normal and bright {k} ANSI color pair.");
         quote! {
@@ -288,7 +298,7 @@ fn make_flavor_ansi_color_pairs_struct(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_flavor_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_flavor_colors_all_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let items = colors_in_order(sample_flavor).map(|(identifier, _)| {
         let ident = format_ident!("{identifier}");
         quote! { &self.#ident }
@@ -306,13 +316,21 @@ fn make_flavor_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_flavor_ansi_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_flavor_ansi_colors_all_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let ansi_colors = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
         let ident = format_ident!("{identifier}");
         quote! { &self.#ident }
     });
-    let ansi_color_pairs = ansi_color_pairs_in_order(sample_flavor)
-        .map(|(identifier, color_pair)| make_ansi_color_pair_entry(identifier, color_pair));
+    let ansi_color_pairs = ansi_color_pairs_in_order(sample_flavor).map(
+        |(identifier, color_pair, normal_identifier, bright_identifier)| {
+            make_ansi_color_pair_entry(
+                identifier,
+                color_pair,
+                &normal_identifier,
+                &bright_identifier,
+            )
+        },
+    );
     quote! {
         impl FlavorAnsiColors {
             /// Get an array of the ANSI colors in the flavor.
@@ -335,8 +353,8 @@ fn make_flavor_ansi_colors_all_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_flavor_ansi_color_pairs_all_impl(sample_flavor: &Flavor) -> TokenStream {
-    let items = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, _)| {
+fn make_flavor_ansi_color_pairs_all_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let items = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, ..)| {
         let ident = format_ident!("{identifier}");
         quote! { &self.#ident }
     });
@@ -353,7 +371,7 @@ fn make_flavor_ansi_color_pairs_all_impl(sample_flavor: &Flavor) -> TokenStream 
     }
 }
 
-fn make_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
+fn make_color_name_enum_tokens(sample_flavor: &Flavor) -> TokenStream {
     let variants = colors_in_order(sample_flavor).map(|(name, _)| {
         let ident = format_ident!("{}", titlecase(name));
         let circles = format!(" {}", color_palette_circles(name));
@@ -372,7 +390,7 @@ fn make_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_name_enum_tokens(sample_flavor: &Flavor) -> TokenStream {
     let variants = ansi_colors_in_order(sample_flavor).map(|(identifier, color)| {
         let name = remove_whitespace(&color.name);
         let ident = format_ident!("{name}");
@@ -392,8 +410,8 @@ fn make_ansi_color_name_enum(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_pair_name_enum(sample_flavor: &Flavor) -> TokenStream {
-    let variants = ansi_color_pairs_in_order(sample_flavor).map(|(name, _)| {
+fn make_ansi_color_pair_name_enum_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let variants = ansi_color_pairs_in_order(sample_flavor).map(|(name, ..)| {
         let ident = format_ident!("{}", titlecase(name));
         let circles = format!(" {}", ansi_color_palette_circles(name));
         quote! {
@@ -411,7 +429,7 @@ fn make_ansi_color_pair_name_enum(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_color_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_color_name_index_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let first = colors_in_order(sample_flavor).map(|(identifier, _)| {
         let variant = format_ident!("{}", titlecase(identifier));
         let ident = format_ident!("{}", identifier);
@@ -446,7 +464,7 @@ fn make_color_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_name_index_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let first = ansi_colors_in_order(sample_flavor).map(|(identifier, color)| {
         let variant = format_ident!("{}", remove_whitespace(&color.name));
         let ident = format_ident!("{}", identifier);
@@ -481,8 +499,8 @@ fn make_ansi_color_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_pair_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
-    let first = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, _)| {
+fn make_ansi_color_pair_name_index_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let first = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, ..)| {
         let variant = format_ident!("{}", titlecase(identifier));
         let ident = format_ident!("{}", identifier);
         quote! {
@@ -516,7 +534,7 @@ fn make_ansi_color_pair_name_index_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_color_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_color_name_display_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = colors_in_order(sample_flavor).map(|(identifier, color)| {
         let variant = format_ident!("{}", titlecase(identifier));
         let name = &color.name;
@@ -535,7 +553,7 @@ fn make_color_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_name_display_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = ansi_colors_in_order(sample_flavor).map(|(_, color)| {
         let name = &color.name;
         let variant = format_ident!("{}", remove_whitespace(name));
@@ -554,8 +572,8 @@ fn make_ansi_color_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_pair_name_display_impl(sample_flavor: &Flavor) -> TokenStream {
-    let match_arms = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, _)| {
+fn make_ansi_color_pair_name_display_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let match_arms = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, ..)| {
         let name = titlecase(identifier);
         let variant = format_ident!("{name}");
         quote! {
@@ -573,7 +591,7 @@ fn make_ansi_color_pair_name_display_impl(sample_flavor: &Flavor) -> TokenStream
     }
 }
 
-fn make_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_color_name_identifier_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = colors_in_order(sample_flavor).map(|(identifier, _)| {
         let variant = format_ident!("{}", titlecase(identifier));
         quote! {
@@ -603,7 +621,7 @@ fn make_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
+fn make_ansi_color_name_identifier_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = ansi_colors_in_order(sample_flavor).map(|(identifier, color)| {
         let variant = format_ident!("{}", remove_whitespace(&color.name));
         quote! {
@@ -633,8 +651,8 @@ fn make_ansi_color_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
     }
 }
 
-fn make_ansi_color_pair_name_identifier_impl(sample_flavor: &Flavor) -> TokenStream {
-    let match_arms = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, _)| {
+fn make_ansi_color_pair_name_identifier_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let match_arms = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, ..)| {
         let variant = format_ident!("{}", titlecase(identifier));
         quote! {
             Self::#variant => #identifier
@@ -715,7 +733,7 @@ fn make_ansi_color_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStre
 
 fn make_ansi_color_pair_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
     let match_arms = ansi_color_pairs_in_order(sample_flavor)
-        .map(|(identifier, _)| {
+        .map(|(identifier, ..)| {
             let variant = format_ident!("{}", titlecase(identifier));
             quote! {
                 #identifier => Ok(Self::#variant)
@@ -736,7 +754,7 @@ fn make_ansi_color_pair_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> Toke
     }
 }
 
-fn make_palette_const(palette: &Palette) -> TokenStream {
+fn make_palette_const_tokens(palette: &Palette) -> TokenStream {
     let flavors =
         flavors_in_order(palette).map(|(identifier, flavor)| make_flavor_entry(identifier, flavor));
     let tokens = quote! {
@@ -825,74 +843,24 @@ fn make_ansi_color_entry(identifier: &str, ansi_color: &AnsiColor) -> TokenStrea
     }
 }
 
-fn make_ansi_color_pair_entry(identifier: &str, ansi_color_pair: &AnsiColorPair) -> TokenStream {
-    let ident = format_ident!("{}", identifier);
-    let AnsiColorPair {
-        name,
-        order,
-        normal:
-            AnsiColor {
-                name: normal_name,
-                code: normal_code,
-                rgb:
-                    Rgb {
-                        r: normal_r,
-                        g: normal_g,
-                        b: normal_b,
-                    },
-                hsl:
-                    Hsl {
-                        h: normal_h,
-                        s: normal_s,
-                        l: normal_l,
-                    },
-            },
-        bright:
-            AnsiColor {
-                name: bright_name,
-                code: bright_code,
-                rgb:
-                    Rgb {
-                        r: bright_r,
-                        g: bright_g,
-                        b: bright_b,
-                    },
-                hsl:
-                    Hsl {
-                        h: bright_h,
-                        s: bright_s,
-                        l: bright_l,
-                    },
-                ..
-            },
-    } = ansi_color_pair;
-
-    let ansi_name_variant = format_ident!("{}", name);
-    let normal_name_variant = format_ident!("{}", normal_name);
-    let bright_name_variant = format_ident!("{}", remove_whitespace(bright_name));
-    let normal_rgb = quote! { Rgb { r: #normal_r, g: #normal_g, b: #normal_b } };
-    let normal_hsl = quote! { Hsl { h: #normal_h, s: #normal_s, l: #normal_l } };
-    let bright_rgb = quote! { Rgb { r: #bright_r, g: #bright_g, b: #bright_b } };
-    let bright_hsl = quote! { Hsl { h: #bright_h, s: #bright_s, l: #bright_l } };
+fn make_ansi_color_pair_entry(
+    identifier: &str,
+    ansi_color_pair: &AnsiColorPair,
+    normal_identifier: &str,
+    bright_identifier: &str,
+) -> TokenStream {
+    let identifier = format_ident!("{}", identifier);
+    let name_identifier = format_ident!("{}", ansi_color_pair.name);
+    let order = ansi_color_pair.order;
+    let normal_identifier = format_ident!("{}", normal_identifier);
+    let bright_identifier = format_ident!("{}", bright_identifier);
 
     quote! {
-        #ident: AnsiColorPair {
-            name: AnsiColorPairName::#ansi_name_variant,
+        #identifier: AnsiColorPair {
+            name: AnsiColorPairName::#name_identifier,
             order: #order,
-            normal: AnsiColor {
-                name: AnsiColorName::#normal_name_variant,
-                hex: Hex(#normal_rgb),
-                rgb: #normal_rgb,
-                hsl: #normal_hsl,
-                code: #normal_code,
-            },
-            bright: AnsiColor {
-                name: AnsiColorName::#bright_name_variant,
-                hex: Hex(#bright_rgb),
-                rgb: #bright_rgb,
-                hsl: #bright_hsl,
-                code: #bright_code,
-            }
+            normal: self.#normal_identifier,
+            bright: self.#bright_identifier,
         }
     }
 }
