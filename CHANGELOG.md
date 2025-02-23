@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.1](https://github.com/catppuccin/rust/compare/v2.5.0...v2.5.1) - 2025-02-23
+
+### Fixed
+
+- use correct colours in ansi colour pairs (#45)
+
 ## [2.5.0](https://github.com/catppuccin/rust/compare/v2.5.0-beta.0...v2.5.0) - 2025-02-20
 
 ### Other
