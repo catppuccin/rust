@@ -206,7 +206,7 @@ impl Palette {
 
     /// Create an iterator over the flavors in the palette.
     #[must_use]
-    pub const fn iter(&self) -> FlavorIterator {
+    pub const fn iter(&self) -> FlavorIterator<'_> {
         FlavorIterator {
             current: 0,
             phantom: PhantomData,
@@ -345,7 +345,7 @@ impl FlavorName {
 impl FlavorColors {
     /// Create an iterator over the colors in the flavor.
     #[must_use]
-    pub const fn iter(&self) -> ColorIterator {
+    pub const fn iter(&self) -> ColorIterator<'_> {
         ColorIterator {
             colors: self,
             current: 0,
@@ -356,7 +356,7 @@ impl FlavorColors {
 impl FlavorAnsiColors {
     /// Create an iterator over the ANSI colors in the flavor.
     #[must_use]
-    pub const fn iter(&self) -> AnsiColorIterator {
+    pub const fn iter(&self) -> AnsiColorIterator<'_> {
         AnsiColorIterator {
             ansi_colors: self,
             current: 0,
@@ -373,7 +373,7 @@ impl FlavorAnsiColors {
 impl FlavorAnsiColorPairs {
     /// Create an iterator over the ANSI color pairs in the flavor.
     #[must_use]
-    pub const fn iter(&self) -> AnsiColorPairsIterator {
+    pub const fn iter(&self) -> AnsiColorPairsIterator<'_> {
         AnsiColorPairsIterator {
             ansi_color_pairs: self,
             current: 0,
@@ -476,7 +476,7 @@ impl<'a> IntoIterator for &'a FlavorAnsiColorPairs {
 impl Flavor {
     /// Create an iterator over the colors in the flavor.
     #[must_use]
-    pub const fn iter(&self) -> ColorIterator {
+    pub const fn iter(&self) -> ColorIterator<'_> {
         self.colors.iter()
     }
 
