@@ -53,6 +53,14 @@
 //!
 //! Example: [`examples/ratatui.rs`](https://github.com/catppuccin/rust/blob/main/examples/ratatui.rs)
 //!
+//! ### Bevy
+//!
+//! Enable the `bevy` feature to enable the conversion of Catppuccin colors to
+//! [`bevy::prelude::Color`] instances.
+//! This adds [bevy](https://crates.io/crates/bevy) as a dependency.
+//!
+//! Example: [`examples/bevy.rs`](https://github.com/catppuccin/rust/blob/main/examples/bevy.rs)
+//!
 //! ### Serde
 //!
 //! Enable the `serde` feature to enable the serialization of Catppuccin's palette,
@@ -644,6 +652,23 @@ mod ratatui {
     impl From<AnsiColor> for ratatui::style::Color {
         fn from(value: AnsiColor) -> Self {
             Self::Rgb(value.rgb.r, value.rgb.g, value.rgb.b)
+        }
+    }
+}
+
+#[cfg(feature = "bevy")]
+mod bevy {
+    use crate::{AnsiColor, Color};
+
+    impl From<Color> for bevy::prelude::Color {
+        fn from(value: Color) -> Self {
+            Self::hsl(value.hsl.h as f32, value.hsl.s as f32, value.hsl.l as f32)
+        }
+    }
+
+    impl From<AnsiColor> for bevy::prelude::Color {
+        fn from(value: AnsiColor) -> Self {
+            Self::hsl(value.hsl.h as f32, value.hsl.s as f32, value.hsl.l as f32)
         }
     }
 }
