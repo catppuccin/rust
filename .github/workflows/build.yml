@@ -3,6 +3,8 @@ name: build
 on:
   workflow_dispatch:
   push:
+    branches:
+      - "main"
     paths:
       - "src/**"
       - "examples/**"
@@ -34,8 +36,8 @@ jobs:
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --all-features --verbose
-      - run: cargo test --all-features --verbose
+      - run: cargo build --features "ansi-term bevy css-colors ratatui serde" --verbose
+      - run: cargo test --features "ansi-term bevy css-colors ratatui serde" --verbose
 
   rustfmt:
     name: rustfmt
