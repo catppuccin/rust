@@ -37,6 +37,14 @@
 //!
 //! Example: [`examples/term_grid.rs`](https://github.com/catppuccin/rust/blob/main/examples/term_grid.rs)
 //!
+//! ### Bevy
+//!
+//! Enable the `bevy` feature to enable the conversion of Catppuccin colors to
+//! [`bevy::prelude::Color`] instances.
+//! This adds [bevy](https://crates.io/crates/bevy) as a dependency.
+//!
+//! Example: [`examples/bevy.rs`](https://github.com/catppuccin/rust/blob/main/examples/bevy.rs)
+//!
 //! ### CSS colors
 //!
 //! Enable the `css-colors` feature to enable the conversion of Catppuccin colors to
@@ -45,6 +53,14 @@
 //!
 //! Example: [`examples/css.rs`](https://github.com/catppuccin/rust/blob/main/examples/css.rs)
 //!
+//! ### Iced
+//!
+//! Enable the `iced` feature to enable the conversion of Catppuccin colors to
+//! [`iced::Color`] instances.
+//! This adds [iced](https://crates.io/crates/iced) as a dependency.
+//!
+//! Example: [`examples/iced.rs`](https://github.com/catppuccin/rust/blob/main/examples/iced.rs)
+//!
 //! ### Ratatui
 //!
 //! Enable the `ratatui` feature to enable the conversion of Catppuccin colors to
@@ -52,14 +68,6 @@
 //! This adds [ratatui](https://crates.io/crates/ratatui) as a dependency.
 //!
 //! Example: [`examples/ratatui.rs`](https://github.com/catppuccin/rust/blob/main/examples/ratatui.rs)
-//!
-//! ### Bevy
-//!
-//! Enable the `bevy` feature to enable the conversion of Catppuccin colors to
-//! [`bevy::prelude::Color`] instances.
-//! This adds [bevy](https://crates.io/crates/bevy) as a dependency.
-//!
-//! Example: [`examples/bevy.rs`](https://github.com/catppuccin/rust/blob/main/examples/bevy.rs)
 //!
 //! ### Serde
 //!
@@ -559,6 +567,58 @@ impl From<(f64, f64, f64)> for Hsl {
     }
 }
 
+#[cfg(feature = "ansi-term")]
+mod ansi_term {
+    use crate::{AnsiColor, Color};
+
+    impl Color {
+        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
+            &self,
+            input: I,
+        ) -> ansi_term::ANSIGenericString<'a, S>
+        where
+            I: Into<std::borrow::Cow<'a, S>>,
+            <S as ToOwned>::Owned: core::fmt::Debug,
+        {
+            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+        }
+    }
+
+    impl AnsiColor {
+        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
+            &self,
+            input: I,
+        ) -> ansi_term::ANSIGenericString<'a, S>
+        where
+            I: Into<std::borrow::Cow<'a, S>>,
+            <S as ToOwned>::Owned: core::fmt::Debug,
+        {
+            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+        }
+    }
+}
+
+#[cfg(feature = "bevy")]
+mod bevy {
+    use crate::{AnsiColor, Color};
+
+    impl From<Color> for bevy::prelude::Color {
+        fn from(value: Color) -> Self {
+            #[allow(clippy::cast_possible_truncation)]
+            Self::hsl(value.hsl.h as f32, value.hsl.s as f32, value.hsl.l as f32)
+        }
+    }
+
+    impl From<AnsiColor> for bevy::prelude::Color {
+        fn from(value: AnsiColor) -> Self {
+            #[allow(clippy::cast_possible_truncation)]
+            Self::hsl(value.hsl.h as f32, value.hsl.s as f32, value.hsl.l as f32)
+        }
+    }
+}
+
 #[cfg(feature = "css-colors")]
 mod css_colors {
     use crate::{AnsiColor, Color};
@@ -606,35 +666,19 @@ mod css_colors {
     }
 }
 
-#[cfg(feature = "ansi-term")]
-mod ansi_term {
+#[cfg(feature = "iced")]
+mod iced {
     use crate::{AnsiColor, Color};
 
-    impl Color {
-        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
-        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
-            &self,
-            input: I,
-        ) -> ansi_term::ANSIGenericString<'a, S>
-        where
-            I: Into<std::borrow::Cow<'a, S>>,
-            <S as ToOwned>::Owned: core::fmt::Debug,
-        {
-            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+    impl From<Color> for iced::Color {
+        fn from(value: Color) -> Self {
+            Self::from_rgb8(value.rgb.r, value.rgb.g, value.rgb.b)
         }
     }
 
-    impl AnsiColor {
-        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
-        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
-            &self,
-            input: I,
-        ) -> ansi_term::ANSIGenericString<'a, S>
-        where
-            I: Into<std::borrow::Cow<'a, S>>,
-            <S as ToOwned>::Owned: core::fmt::Debug,
-        {
-            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+    impl From<AnsiColor> for iced::Color {
+        fn from(value: AnsiColor) -> Self {
+            Self::from_rgb8(value.rgb.r, value.rgb.g, value.rgb.b)
         }
     }
 }
@@ -652,23 +696,6 @@ mod ratatui {
     impl From<AnsiColor> for ratatui::style::Color {
         fn from(value: AnsiColor) -> Self {
             Self::Rgb(value.rgb.r, value.rgb.g, value.rgb.b)
-        }
-    }
-}
-
-#[cfg(feature = "bevy")]
-mod bevy {
-    use crate::{AnsiColor, Color};
-
-    impl From<Color> for bevy::prelude::Color {
-        fn from(value: Color) -> Self {
-            Self::hsl(value.hsl.h as f32, value.hsl.s as f32, value.hsl.l as f32)
-        }
-    }
-
-    impl From<AnsiColor> for bevy::prelude::Color {
-        fn from(value: AnsiColor) -> Self {
-            Self::hsl(value.hsl.h as f32, value.hsl.s as f32, value.hsl.l as f32)
         }
     }
 }
