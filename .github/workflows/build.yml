@@ -21,6 +21,14 @@ jobs:
     env:
       RUST_BACKTRACE: 1
     steps:
+      - run: >
+          sudo apt install -y
+          libx11-dev
+          libasound2-dev
+          libudev-dev
+          libxkbcommon-x11-0
+          libwayland-dev
+          libxkbcommon-dev
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
