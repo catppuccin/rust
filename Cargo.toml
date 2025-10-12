@@ -11,7 +11,7 @@ license = "MIT"
 keywords = ["catppuccin", "palette", "color", "colorscheme", "theme"]
 
 [package.metadata.docs.rs]
-features = ["ansi-term", "bevy", "css-colors", "ratatui", "serde"]
+features = ["ansi-term", "bevy", "css-colors", "iced", "ratatui", "serde"]
 
 [lints]
 rust.missing_docs = "warn"
@@ -50,20 +50,24 @@ ratatui = ["dep:ratatui"]
 serde = ["dep:serde"]
 
 [[example]]
-name = "css"
-required-features = ["css-colors"]
-
-[[example]]
 name = "term_grid"
 required-features = ["ansi-term"]
 
 [[example]]
-name = "ratatui"
-required-features = ["ratatui"]
-
-[[example]]
 name = "bevy"
 required-features = ["bevy-full"]
+
+[[example]]
+name = "css"
+required-features = ["css-colors"]
+
+[[example]]
+name = "iced"
+required-features = ["iced"]
+
+[[example]]
+name = "ratatui"
+required-features = ["ratatui"]
 
 [[example]]
 name = "serde"
