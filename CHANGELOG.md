@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0](https://github.com/catppuccin/rust/compare/v2.5.1...v2.6.0) - 2025-10-13
+
+### Added
+
+- add iced feature ([#53](https://github.com/catppuccin/rust/pull/53))
+- don't include all of bevy by default ([#54](https://github.com/catppuccin/rust/pull/54))
+- add bevy feature ([#48](https://github.com/catppuccin/rust/pull/48))
+
+### Other
+
+- upgrade dependencies ([#51](https://github.com/catppuccin/rust/pull/51))
+
 ## [2.5.1](https://github.com/catppuccin/rust/compare/v2.5.0...v2.5.1) - 2025-02-23
 
 ### Fixed
