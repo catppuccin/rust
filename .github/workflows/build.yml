@@ -36,8 +36,8 @@ jobs:
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --features "ansi-term bevy css-colors ratatui serde" --verbose
-      - run: cargo test --features "ansi-term bevy css-colors ratatui serde" --verbose
+      - run: cargo build --features "ansi-term bevy css-colors iced ratatui serde" --verbose
+      - run: cargo test --features "ansi-term bevy css-colors iced ratatui serde" --verbose
 
   rustfmt:
     name: rustfmt
@@ -48,4 +48,5 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt
+      - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
