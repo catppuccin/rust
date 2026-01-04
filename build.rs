@@ -543,8 +543,8 @@ fn make_color_name_display_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
         }
     });
     quote! {
-        impl std::fmt::Display for ColorName {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        impl core::fmt::Display for ColorName {
+            fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
                 match self {
                     #(#match_arms),*
                 }
@@ -562,8 +562,8 @@ fn make_ansi_color_name_display_impl_tokens(sample_flavor: &Flavor) -> TokenStre
         }
     });
     quote! {
-        impl std::fmt::Display for AnsiColorName {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        impl core::fmt::Display for AnsiColorName {
+            fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
                 match self {
                     #(#match_arms),*
                 }
@@ -581,8 +581,8 @@ fn make_ansi_color_pair_name_display_impl_tokens(sample_flavor: &Flavor) -> Toke
         }
     });
     quote! {
-        impl std::fmt::Display for AnsiColorPairName {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        impl core::fmt::Display for AnsiColorPairName {
+            fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
                 match self {
                     #(#match_arms),*
                 }
@@ -695,7 +695,7 @@ fn make_color_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
         })
         .collect::<Vec<_>>();
     quote! {
-        impl std::str::FromStr for ColorName {
+        impl core::str::FromStr for ColorName {
             type Err = ParseColorNameError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -718,7 +718,7 @@ fn make_ansi_color_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> TokenStre
         })
         .collect::<Vec<_>>();
     quote! {
-        impl std::str::FromStr for AnsiColorName {
+        impl core::str::FromStr for AnsiColorName {
             type Err = ParseColorNameError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -741,7 +741,7 @@ fn make_ansi_color_pair_name_fromstr_impl_tokens(sample_flavor: &Flavor) -> Toke
         })
         .collect::<Vec<_>>();
     quote! {
-        impl std::str::FromStr for AnsiColorPairName {
+        impl core::str::FromStr for AnsiColorPairName {
             type Err = ParseColorNameError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {

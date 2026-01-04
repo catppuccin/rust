@@ -76,7 +76,11 @@
 //! This adds [serde](https://crates.io/crates/serde) as a dependency.
 //!
 //! Example: [`examples/serde.rs`](https://github.com/catppuccin/rust/blob/main/examples/serde.rs)
-use std::{fmt, marker::PhantomData, ops::Index, str::FromStr};
+#![no_std]
+
+extern crate alloc;
+
+use core::{fmt, marker::PhantomData, ops::Index, str::FromStr};
 
 include!(concat!(env!("OUT_DIR"), "/generated_palette.rs"));
 
@@ -272,6 +276,9 @@ mod _hex {
 
     use crate::{Hex, Rgb};
 
+    use alloc::string::String;
+    use alloc::string::ToString;
+
     impl Serialize for Hex {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
@@ -311,8 +318,8 @@ impl fmt::Display for FlavorName {
 /// Error type for parsing a [`FlavorName`] from a string.
 #[derive(Debug, PartialEq, Eq)]
 pub struct ParseFlavorNameError;
-impl std::error::Error for ParseFlavorNameError {}
-impl std::fmt::Display for ParseFlavorNameError {
+impl core::error::Error for ParseFlavorNameError {}
+impl core::fmt::Display for ParseFlavorNameError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -515,8 +522,8 @@ impl<'a> IntoIterator for &'a Flavor {
 /// Error type for parsing a [`ColorName`] from a string.
 #[derive(Debug, PartialEq, Eq)]
 pub struct ParseColorNameError;
-impl std::error::Error for ParseColorNameError {}
-impl std::fmt::Display for ParseColorNameError {
+impl core::error::Error for ParseColorNameError {}
+impl core::fmt::Display for ParseColorNameError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "invalid color identifier")
     }
@@ -570,6 +577,7 @@ impl From<(f64, f64, f64)> for Hsl {
 #[cfg(feature = "ansi-term")]
 mod ansi_term {
     use crate::{AnsiColor, Color};
+    use alloc::borrow::ToOwned;
 
     impl Color {
         /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
@@ -578,7 +586,7 @@ mod ansi_term {
             input: I,
         ) -> ansi_term::ANSIGenericString<'a, S>
         where
-            I: Into<std::borrow::Cow<'a, S>>,
+            I: Into<alloc::borrow::Cow<'a, S>>,
             <S as ToOwned>::Owned: core::fmt::Debug,
         {
             ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
@@ -592,7 +600,7 @@ mod ansi_term {
             input: I,
         ) -> ansi_term::ANSIGenericString<'a, S>
         where
-            I: Into<std::borrow::Cow<'a, S>>,
+            I: Into<alloc::borrow::Cow<'a, S>>,
             <S as ToOwned>::Owned: core::fmt::Debug,
         {
             ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
