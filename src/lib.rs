@@ -695,13 +695,13 @@ mod iced {
 mod ratatui {
     use crate::{AnsiColor, Color};
 
-    impl From<Color> for ratatui::style::Color {
+    impl From<Color> for ratatui_core::style::Color {
         fn from(value: Color) -> Self {
             Self::Rgb(value.rgb.r, value.rgb.g, value.rgb.b)
         }
     }
 
-    impl From<AnsiColor> for ratatui::style::Color {
+    impl From<AnsiColor> for ratatui_core::style::Color {
         fn from(value: AnsiColor) -> Self {
             Self::Rgb(value.rgb.r, value.rgb.g, value.rgb.b)
         }
