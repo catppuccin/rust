@@ -21,7 +21,7 @@ clippy.nursery = "warn"
 
 [dependencies]
 ansi_term = { version = "0.12", optional = true }
-bevy = { version = "0.17", default-features = false, optional = true }
+bevy = { version = "0.18", default-features = false, optional = true }
 css-colors = { version = "1.0", optional = true }
 iced = { version = "0.13.1", optional = true }
 ratatui-core = { version = "0.1.0", optional = true }
