@@ -68,7 +68,7 @@ impl Counter {
 }
 
 fn main() -> Result {
-    application("Counter", Counter::update, Counter::view)
+    application(|| Counter { value: 0 }, Counter::update, Counter::view)
         .style(move |_, _| Appearance {
             background_color: COLORS.base.into(),
             text_color: COLORS.text.into(),
