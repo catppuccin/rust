@@ -1,7 +1,7 @@
 //! Example demonstrating integration with the `iced` crate.
 use iced::{
     application,
-    daemon::Appearance,
+    theme::Style,
     widget::{button, column, container, text},
     Alignment::Center,
     Element,
@@ -68,8 +68,8 @@ impl Counter {
 }
 
 fn main() -> Result {
-    application("Counter", Counter::update, Counter::view)
-        .style(move |_, _| Appearance {
+    application(|| Counter { value: 0 }, Counter::update, Counter::view)
+        .style(move |_, _| Style {
             background_color: COLORS.base.into(),
             text_color: COLORS.text.into(),
         })
