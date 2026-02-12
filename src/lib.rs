@@ -684,9 +684,21 @@ mod iced {
         }
     }
 
+    impl From<Color> for iced::Background {
+        fn from(value: Color) -> Self {
+            Self::Color(value.into())
+        }
+    }
+
     impl From<AnsiColor> for iced::Color {
         fn from(value: AnsiColor) -> Self {
             Self::from_rgb8(value.rgb.r, value.rgb.g, value.rgb.b)
+        }
+    }
+
+    impl From<AnsiColor> for iced::Background {
+        fn from(value: AnsiColor) -> Self {
+            Self::Color(value.into())
         }
     }
 }
