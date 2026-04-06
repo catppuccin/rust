@@ -151,6 +151,18 @@ pub struct Hsl {
     pub l: f64,
 }
 
+/// Color represented as individual lightness (0–1), chroma (0+), and hue (0–360) channels.
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Oklch {
+    /// Lightness channel.
+    pub l: f64,
+    /// Chroma channel.
+    pub c: f64,
+    /// Hue channel.
+    pub h: f64,
+}
+
 /// A single color in the Catppuccin palette.
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -170,6 +182,8 @@ pub struct Color {
     pub rgb: Rgb,
     /// The color represented as individual hue, saturation, and lightness channels.
     pub hsl: Hsl,
+    /// The color represented as lightness, chroma, and hue channels.
+    pub oklch: Oklch,
 }
 
 /// A flavor is a collection of colors. Catppuccin has four flavors; Latte,
@@ -571,6 +585,12 @@ impl From<(u8, u8, u8)> for Hex {
 impl From<(f64, f64, f64)> for Hsl {
     fn from((h, s, l): (f64, f64, f64)) -> Self {
         Self { h, s, l }
+    }
+}
+
+impl From<(f64, f64, f64)> for Oklch {
+    fn from((l, c, h): (f64, f64, f64)) -> Self {
+        Self { l, c, h }
     }
 }
 

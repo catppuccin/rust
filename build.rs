@@ -40,6 +40,7 @@ struct Color {
     order: u32,
     rgb: Rgb,
     hsl: Hsl,
+    oklch: Oklch,
     accent: bool,
 }
 
@@ -55,6 +56,13 @@ struct Hsl {
     h: f64,
     s: f64,
     l: f64,
+}
+
+#[derive(Debug, Deserialize)]
+struct Oklch {
+    l: f64,
+    c: f64,
+    h: f64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -803,10 +811,12 @@ fn make_color_entry(identifier: &str, color: &Color) -> TokenStream {
         accent,
         rgb: Rgb { r, g, b },
         hsl: Hsl { h, s, l },
+        oklch: Oklch { l: ol, c: oc, h: oh, },
         ..
     } = color;
     let rgb = quote! { Rgb { r: #r, g: #g, b: #b } };
     let hsl = quote! { Hsl { h: #h, s: #s, l: #l } };
+    let oklch = quote! { Oklch { l: #ol, c: #oc, h: #oh } };
     quote! {
         #ident: Color {
             name: ColorName::#colorname_variant,
@@ -815,6 +825,7 @@ fn make_color_entry(identifier: &str, color: &Color) -> TokenStream {
             hex: Hex(#rgb),
             rgb: #rgb,
             hsl: #hsl,
+            oklch: #oklch,
         }
     }
 }
