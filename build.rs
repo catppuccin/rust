@@ -811,7 +811,11 @@ fn make_color_entry(identifier: &str, color: &Color) -> TokenStream {
         accent,
         rgb: Rgb { r, g, b },
         hsl: Hsl { h, s, l },
-        oklch: Oklch { l: ol, c: oc, h: oh, },
+        oklch: Oklch {
+            l: ol,
+            c: oc,
+            h: oh,
+        },
         ..
     } = color;
     let rgb = quote! { Rgb { r: #r, g: #g, b: #b } };
