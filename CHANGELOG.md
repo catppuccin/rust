@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0](https://github.com/catppuccin/rust/compare/v2.7.0...v2.8.0) - 2026-04-26
+
+### Added
+
+- upgrade dependencies ([#72](https://github.com/catppuccin/rust/pull/72))
+- add oklch ([#68](https://github.com/catppuccin/rust/pull/68))
+- auto-sync upstream palettes ([#70](https://github.com/catppuccin/rust/pull/70))
+
+### Other
+
+- *(deps)* update actions/checkout action to v6 ([#56](https://github.com/catppuccin/rust/pull/56))
+
 ## [2.7.0](https://github.com/catppuccin/rust/compare/v2.6.0...v2.7.0) - 2026-02-01
 
 ### Added
