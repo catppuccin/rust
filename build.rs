@@ -68,7 +68,7 @@ struct Oklch {
 #[derive(Debug, Deserialize)]
 struct AnsiColorPair {
     name: String,
-    order: u32,
+    order: u8,
     normal: AnsiColor,
     bright: AnsiColor,
 }
@@ -297,7 +297,7 @@ fn make_flavor_ansi_color_pairs_struct_tokens(sample_flavor: &Flavor) -> TokenSt
             /// The [`AnsiColorPairName`] for this color.
             pub name: AnsiColorPairName,
             /// Order of the ANSI color in the palette spec.
-            pub order: u32,
+            pub order: u8,
             /// The normal color.
             pub normal: AnsiColor,
             /// The bright color.
