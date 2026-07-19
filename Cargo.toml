@@ -29,7 +29,7 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 
 [build-dependencies]
 itertools = "0.14"
-prettyplease = "0.2"
+prettyplease = "0.3"
 proc-macro2 = "1.0"
 quote = "1.0"
 serde = { version = "1.0", features = ["derive"] }
