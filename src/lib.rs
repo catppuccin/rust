@@ -56,16 +56,16 @@
 //! ### Iced
 //!
 //! Enable the `iced` feature to enable the conversion of Catppuccin colors to
-//! [`iced::Color`] instances.
-//! This adds [iced](https://crates.io/crates/iced) as a dependency.
+//! [`iced::Color`](iced_core::Color) instances.
+//! This adds [iced_core](https://crates.io/crates/iced_core) as a dependency.
 //!
 //! Example: [`examples/iced.rs`](https://github.com/catppuccin/rust/blob/main/examples/iced.rs)
 //!
 //! ### Ratatui
 //!
 //! Enable the `ratatui` feature to enable the conversion of Catppuccin colors to
-//! [`ratatui::style::Color`] instances.
-//! This adds [ratatui](https://crates.io/crates/ratatui) as a dependency.
+//! [`ratatui::style::Color`](ratatui_core::style::Color) instances.
+//! This adds [ratatui-core](https://crates.io/crates/ratatui-core) as a dependency.
 //!
 //! Example: [`examples/ratatui.rs`](https://github.com/catppuccin/rust/blob/main/examples/ratatui.rs)
 //!
@@ -575,7 +575,7 @@ impl From<(f64, f64, f64)> for Oklch {
 }
 
 #[cfg(feature = "bevy")]
-mod bevy {
+mod bevy_impls {
     use crate::{AnsiColor, Color};
 
     impl From<Color> for bevy::prelude::Color {
@@ -594,7 +594,7 @@ mod bevy {
 }
 
 #[cfg(feature = "css-colors")]
-mod css_colors {
+mod css_colors_impls {
     use crate::{AnsiColor, Color};
 
     impl From<Color> for css_colors::RGB {
@@ -641,7 +641,7 @@ mod css_colors {
 }
 
 #[cfg(feature = "iced")]
-mod iced {
+mod iced_impls {
     use crate::{AnsiColor, Color};
 
     impl From<Color> for iced_core::Color {
@@ -670,7 +670,7 @@ mod iced {
 }
 
 #[cfg(feature = "ratatui")]
-mod ratatui {
+mod ratatui_impls {
     use crate::{AnsiColor, Color};
 
     impl From<Color> for ratatui_core::style::Color {

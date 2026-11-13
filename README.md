@@ -47,7 +47,7 @@ More examples can be found
 ### ANSI string painting
 
 Enable the `ansi-term` feature to add the
-[`Color::ansi_paint`](Color::ansi_paint) method.
+[`Color::ansi_paint`](https://docs.rs/catppuccin/latest/catppuccin/struct.Color.html#method.ansi_paint) method.
 This adds [ansi-term](https://crates.io/crates/ansi_term) as a dependency.
 
 Example: [`examples/term_grid.rs`](https://github.com/catppuccin/rust/blob/main/examples/term_grid.rs)
@@ -55,7 +55,7 @@ Example: [`examples/term_grid.rs`](https://github.com/catppuccin/rust/blob/main/
 #### Bevy
 
 Enable the `bevy` feature to enable the conversion of Catppuccin colors to
-[`bevy::prelude::Color`] instances.
+[`bevy::prelude::Color`](https://docs.rs/bevy/0.20/bevy/prelude/enum.Color.html) instances.
 This adds [bevy](https://crates.io/crates/bevy) as a dependency.
 
 Example: [`examples/bevy.rs`](https://github.com/catppuccin/rust/blob/main/examples/bevy.rs)
@@ -63,7 +63,7 @@ Example: [`examples/bevy.rs`](https://github.com/catppuccin/rust/blob/main/examp
 #### CSS colors
 
 Enable the `css-colors` feature to enable the conversion of Catppuccin colors to
-[`css_colors::RGB`] instances.
+[`css_colors::RGB`](https://docs.rs/css-colors/1/css_colors/struct.RGB.html) instances.
 This adds [css-colors](https://crates.io/crates/css-colors) as a dependency.
 
 Example: [`examples/css.rs`](https://github.com/catppuccin/rust/blob/main/examples/css.rs)
@@ -71,16 +71,16 @@ Example: [`examples/css.rs`](https://github.com/catppuccin/rust/blob/main/exampl
 #### Iced
 
 Enable the `iced` feature to enable the conversion of Catppuccin colors to
-[`iced::Color`] instances.
-This adds [iced](https://crates.io/crates/iced) as a dependency.
+[`iced::Color`](https://docs.rs/iced_core/0.14/iced_core/struct.Color.html) instances.
+This adds [iced_core](https://crates.io/crates/iced_core) as a dependency.
 
 Example: [`examples/iced.rs`](https://github.com/catppuccin/rust/blob/main/examples/iced.rs)
 
 #### Ratatui
 
 Enable the `ratatui` feature to enable the conversion of Catppuccin colors to
-[`ratatui::style::Color`] instances.
-This adds [ratatui](https://crates.io/crates/ratatui) as a dependency.
+[`ratatui::style::Color`](https://docs.rs/ratatui-core/0.1/ratatui_core/style/enum.Color.html) instances.
+This adds [ratatui-core](https://crates.io/crates/ratatui-core) as a dependency.
 
 Example: [`examples/ratatui.rs`](https://github.com/catppuccin/rust/blob/main/examples/ratatui.rs)
 
