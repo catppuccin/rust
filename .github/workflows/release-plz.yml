@@ -18,7 +18,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Install Rust toolchain
@@ -43,8 +43,17 @@ jobs:
       group: release-plz-${{ github.ref }}
       cancel-in-progress: false
     steps:
+      - name: Install bevy dependencies
+        run: >
+          sudo apt update && sudo apt install -y
+          libx11-dev
+          libasound2-dev
+          libudev-dev
+          libxkbcommon-x11-0
+          libwayland-dev
+          libxkbcommon-dev
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Install Rust toolchain

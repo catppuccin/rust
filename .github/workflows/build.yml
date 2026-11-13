@@ -10,16 +10,18 @@ on:
       - "examples/**"
       - "build.rs"
       - "Cargo.toml"
+      - ".github/workflows/build.yml"
   pull_request:
     paths:
       - "src/**"
       - "examples/**"
       - "build.rs"
       - "Cargo.toml"
+      - ".github/workflows/build.yml"
 
 jobs:
   compile:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       RUST_BACKTRACE: 1
     steps:
@@ -31,19 +33,20 @@ jobs:
           libxkbcommon-x11-0
           libwayland-dev
           libxkbcommon-dev
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --features "ansi-term bevy css-colors iced ratatui serde" --verbose
       - run: cargo test --features "ansi-term bevy css-colors iced ratatui serde" --verbose
+      - run: cargo check --all-targets --all-features --verbose
 
   rustfmt:
     name: rustfmt
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
