@@ -97,31 +97,31 @@ fn main() -> Result<(), Box<dyn Error>> {
     let flavor_tokens = [
         // Colors
         make_flavor_colors_struct_tokens(sample_flavor),
-        make_flavor_colors_all_impl_tokens(sample_flavor),
+        make_flavor_colors_impl_tokens(sample_flavor),
         // ANSI Colors
         make_flavor_ansi_colors_struct_tokens(sample_flavor),
-        make_flavor_ansi_colors_all_impl_tokens(sample_flavor),
+        make_flavor_ansi_colors_impl_tokens(sample_flavor),
         // ANSI Color Pairs
         make_flavor_ansi_color_pairs_struct_tokens(sample_flavor),
-        make_flavor_ansi_color_pairs_all_impl_tokens(sample_flavor),
+        make_flavor_ansi_color_pairs_impl_tokens(sample_flavor),
     ];
     let color_tokens = [
         make_color_name_enum_tokens(sample_flavor),
-        make_color_name_index_impl_tokens(sample_flavor),
+        make_color_name_index_impl_tokens(),
         make_color_name_display_impl_tokens(sample_flavor),
         make_color_name_identifier_impl_tokens(sample_flavor),
         make_color_name_fromstr_impl_tokens(sample_flavor),
     ];
     let ansi_color_tokens = [
         make_ansi_color_name_enum_tokens(sample_flavor),
-        make_ansi_color_name_index_impl_tokens(sample_flavor),
+        make_ansi_color_name_index_impl_tokens(),
         make_ansi_color_name_display_impl_tokens(sample_flavor),
         make_ansi_color_name_identifier_impl_tokens(sample_flavor),
         make_ansi_color_name_fromstr_impl_tokens(sample_flavor),
     ];
     let ansi_color_pair_tokens = [
         make_ansi_color_pair_name_enum_tokens(sample_flavor),
-        make_ansi_color_pair_name_index_impl_tokens(sample_flavor),
+        make_ansi_color_pair_name_index_impl_tokens(),
         make_ansi_color_pair_name_display_impl_tokens(sample_flavor),
         make_ansi_color_pair_name_identifier_impl_tokens(sample_flavor),
         make_ansi_color_pair_name_fromstr_impl_tokens(sample_flavor),
@@ -306,29 +306,160 @@ fn make_flavor_ansi_color_pairs_struct_tokens(sample_flavor: &Flavor) -> TokenSt
     }
 }
 
-fn make_flavor_colors_all_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
-    let items = colors_in_order(sample_flavor).map(|(identifier, _)| {
-        let ident = format_ident!("{identifier}");
-        quote! { &self.#ident }
-    });
+fn make_flavor_colors_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let methods = [
+        make_flavor_colors_get_color_tokens(sample_flavor),
+        make_flavor_colors_iter_tokens(),
+        make_flavor_colors_all_colors_tokens(sample_flavor),
+    ];
     quote! {
         impl FlavorColors {
-            /// Get an array of the colors in the flavor.
-            #[must_use]
-            pub const fn all_colors(&self) -> [&Color; 26] {
-                [
-                    #(#items),*
-                ]
+            #(#methods)*
+        }
+    }
+}
+
+fn make_flavor_ansi_colors_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let methods = [
+        make_flavor_ansi_colors_get_ansi_color_tokens(sample_flavor),
+        make_flavor_ansi_colors_iter_tokens(),
+        make_flavor_ansi_colors_all_ansi_colors_tokens(sample_flavor),
+        make_flavor_ansi_colors_to_ansi_color_pairs_tokens(sample_flavor),
+        make_flavor_ansi_colors_all_pairs_tokens(),
+    ];
+    quote! {
+        impl FlavorAnsiColors {
+            #(#methods)*
+        }
+    }
+}
+
+fn make_flavor_ansi_color_pairs_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let methods = [
+        make_flavor_ansi_color_pairs_get_ansi_color_pair_tokens(sample_flavor),
+        make_flavor_ansi_color_pairs_iter_tokens(),
+        make_flavor_ansi_color_pairs_all_ansi_color_pairs_tokens(sample_flavor),
+    ];
+    quote! {
+        impl FlavorAnsiColorPairs {
+            #(#methods)*
+        }
+    }
+}
+
+fn make_flavor_colors_get_color_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let match_arms = colors_in_order(sample_flavor).map(|(identifier, _)| {
+        let variant = format_ident!("{}", titlecase(identifier));
+        let ident = format_ident!("{}", identifier);
+        quote! {
+            ColorName::#variant => &self.#ident
+        }
+    });
+    quote! {
+        /// Get a color by name.
+        ///
+        /// This is equivalent to using the index operator, but can also be used in
+        /// const contexts.
+        #[must_use]
+        pub const fn get_color(&self, name: ColorName) -> &Color {
+            match name {
+                #(#match_arms),*
             }
         }
     }
 }
 
-fn make_flavor_ansi_colors_all_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+fn make_flavor_colors_iter_tokens() -> TokenStream {
+    quote! {
+        /// Create an iterator over the colors in the flavor.
+        #[must_use]
+        pub const fn iter(&self) -> ColorIterator<'_> {
+            ColorIterator {
+                colors: self,
+                current: 0,
+            }
+        }
+    }
+}
+
+fn make_flavor_colors_all_colors_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let items = colors_in_order(sample_flavor).map(|(identifier, _)| {
+        let ident = format_ident!("{identifier}");
+        quote! { &self.#ident }
+    });
+    quote! {
+        /// Get an array of the colors in the flavor.
+        #[must_use]
+        pub const fn all_colors(&self) -> [&Color; 26] {
+            [
+                #(#items),*
+            ]
+        }
+    }
+}
+
+fn make_flavor_ansi_colors_get_ansi_color_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let match_arms = ansi_colors_in_order(sample_flavor).map(|(identifier, color)| {
+        let variant = format_ident!("{}", remove_whitespace(&color.name));
+        let ident = format_ident!("{}", identifier);
+        quote! {
+            AnsiColorName::#variant => &self.#ident
+        }
+    });
+    quote! {
+        /// Get an ANSI color by name.
+        ///
+        /// This is equivalent to using the index operator, but can also be used in
+        /// const contexts.
+        #[must_use]
+        pub const fn get_ansi_color(&self, name: AnsiColorName) -> &AnsiColor {
+            match name {
+                #(#match_arms),*
+            }
+        }
+    }
+}
+
+fn make_flavor_ansi_colors_iter_tokens() -> TokenStream {
+    quote! {
+        /// Create an iterator over the ANSI colors in the flavor.
+        #[must_use]
+        pub const fn iter(&self) -> AnsiColorIterator<'_> {
+            AnsiColorIterator {
+                ansi_colors: self,
+                current: 0,
+            }
+        }
+    }
+}
+
+fn make_flavor_ansi_colors_all_ansi_colors_tokens(sample_flavor: &Flavor) -> TokenStream {
     let ansi_colors = ansi_colors_in_order(sample_flavor).map(|(identifier, _)| {
         let ident = format_ident!("{identifier}");
         quote! { &self.#ident }
     });
+    quote! {
+        /// Get an array of the ANSI colors in the flavor.
+        #[must_use]
+        pub const fn all_ansi_colors(&self) -> [&AnsiColor; 16] {
+            [
+                #(#ansi_colors),*
+            ]
+        }
+    }
+}
+
+fn make_flavor_ansi_colors_all_pairs_tokens() -> TokenStream {
+    quote! {
+        /// Get the ANSI color pairs
+        #[must_use]
+        pub const fn all_pairs(&self) -> FlavorAnsiColorPairs {
+            self.to_ansi_color_pairs()
+        }
+    }
+}
+
+fn make_flavor_ansi_colors_to_ansi_color_pairs_tokens(sample_flavor: &Flavor) -> TokenStream {
     let ansi_color_pairs = ansi_color_pairs_in_order(sample_flavor).map(
         |(identifier, color_pair, normal_identifier, bright_identifier)| {
             make_ansi_color_pair_entry(
@@ -340,41 +471,64 @@ fn make_flavor_ansi_colors_all_impl_tokens(sample_flavor: &Flavor) -> TokenStrea
         },
     );
     quote! {
-        impl FlavorAnsiColors {
-            /// Get an array of the ANSI colors in the flavor.
-            #[must_use]
-            pub const fn all_ansi_colors(&self) -> [&AnsiColor; 16] {
-                [
-                    #(#ansi_colors),*
-                ]
-            }
-
-            /// Convert the 16 ANSI colors to 8 ANSI color pairs.
-            #[must_use]
-            #[allow(clippy::too_many_lines, clippy::unreadable_literal)]
-            pub const fn to_ansi_color_pairs(&self) -> FlavorAnsiColorPairs {
-                FlavorAnsiColorPairs {
-                    #(#ansi_color_pairs),*
-                }
+        /// Convert the 16 ANSI colors to 8 ANSI color pairs.
+        #[must_use]
+        #[allow(clippy::too_many_lines, clippy::unreadable_literal)]
+        pub const fn to_ansi_color_pairs(&self) -> FlavorAnsiColorPairs {
+            FlavorAnsiColorPairs {
+                #(#ansi_color_pairs),*
             }
         }
     }
 }
 
-fn make_flavor_ansi_color_pairs_all_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
+fn make_flavor_ansi_color_pairs_get_ansi_color_pair_tokens(sample_flavor: &Flavor) -> TokenStream {
+    let match_arms = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, ..)| {
+        let variant = format_ident!("{}", titlecase(identifier));
+        let ident = format_ident!("{}", identifier);
+        quote! {
+            AnsiColorPairName::#variant => &self.#ident
+        }
+    });
+    quote! {
+        /// Get an ANSI color pair by name.
+        ///
+        /// This is equivalent to using the index operator, but can also be used in
+        /// const contexts.
+        #[must_use]
+        pub const fn get_ansi_color_pair(&self, name: AnsiColorPairName) -> &AnsiColorPair {
+            match name {
+                #(#match_arms),*
+            }
+        }
+    }
+}
+
+fn make_flavor_ansi_color_pairs_iter_tokens() -> TokenStream {
+    quote! {
+        /// Create an iterator over the ANSI color pairs in the flavor.
+        #[must_use]
+        pub const fn iter(&self) -> AnsiColorPairsIterator<'_> {
+            AnsiColorPairsIterator {
+                ansi_color_pairs: self,
+                current: 0,
+            }
+        }
+    }
+}
+
+fn make_flavor_ansi_color_pairs_all_ansi_color_pairs_tokens(sample_flavor: &Flavor) -> TokenStream {
     let items = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, ..)| {
         let ident = format_ident!("{identifier}");
         quote! { &self.#ident }
     });
     quote! {
-        impl FlavorAnsiColorPairs {
-            /// Get an array of the ANSI color pairs in the flavor.
-            #[must_use]
-            pub const fn all_ansi_color_pairs(&self) -> [&AnsiColorPair; 8] {
-                [
-                    #(#items),*
-                ]
-            }
+        /// Get an array of the ANSI color pairs in the flavor.
+        #[must_use]
+        pub const fn all_ansi_color_pairs(&self) -> [&AnsiColorPair; 8] {
+            [
+                #(#items),*
+            ]
         }
     }
 }
@@ -437,106 +591,37 @@ fn make_ansi_color_pair_name_enum_tokens(sample_flavor: &Flavor) -> TokenStream 
     }
 }
 
-fn make_color_name_index_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
-    let first = colors_in_order(sample_flavor).map(|(identifier, _)| {
-        let variant = format_ident!("{}", titlecase(identifier));
-        let ident = format_ident!("{}", identifier);
-        quote! {
-            ColorName::#variant => &self.#ident
-        }
-    });
-    let second = first.clone();
+fn make_color_name_index_impl_tokens() -> TokenStream {
     quote! {
         impl Index<ColorName> for FlavorColors {
             type Output = Color;
 
             fn index(&self, index: ColorName) -> &Self::Output {
-                match index {
-                    #(#first),*
-                }
-            }
-        }
-
-        impl FlavorColors {
-            /// Get a color by name.
-            ///
-            /// This is equivalent to using the index operator, but can also be used in
-            /// const contexts.
-            #[must_use]
-            pub const fn get_color(&self, name: ColorName) -> &Color {
-                match name {
-                    #(#second),*
-                }
+                self.get_color(index)
             }
         }
     }
 }
 
-fn make_ansi_color_name_index_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
-    let first = ansi_colors_in_order(sample_flavor).map(|(identifier, color)| {
-        let variant = format_ident!("{}", remove_whitespace(&color.name));
-        let ident = format_ident!("{}", identifier);
-        quote! {
-            AnsiColorName::#variant => &self.#ident
-        }
-    });
-    let second = first.clone();
+fn make_ansi_color_name_index_impl_tokens() -> TokenStream {
     quote! {
         impl Index<AnsiColorName> for FlavorAnsiColors {
             type Output = AnsiColor;
 
             fn index(&self, index: AnsiColorName) -> &Self::Output {
-                match index {
-                    #(#first),*
-                }
-            }
-        }
-
-        impl FlavorAnsiColors {
-            /// Get an ANSI color by name.
-            ///
-            /// This is equivalent to using the index operator, but can also be used in
-            /// const contexts.
-            #[must_use]
-            pub const fn get_ansi_color(&self, name: AnsiColorName) -> &AnsiColor {
-                match name {
-                    #(#second),*
-                }
+                self.get_ansi_color(index)
             }
         }
     }
 }
 
-fn make_ansi_color_pair_name_index_impl_tokens(sample_flavor: &Flavor) -> TokenStream {
-    let first = ansi_color_pairs_in_order(sample_flavor).map(|(identifier, ..)| {
-        let variant = format_ident!("{}", titlecase(identifier));
-        let ident = format_ident!("{}", identifier);
-        quote! {
-            AnsiColorPairName::#variant => &self.#ident
-        }
-    });
-    let second = first.clone();
+fn make_ansi_color_pair_name_index_impl_tokens() -> TokenStream {
     quote! {
         impl Index<AnsiColorPairName> for FlavorAnsiColorPairs {
             type Output = AnsiColorPair;
 
             fn index(&self, index: AnsiColorPairName) -> &Self::Output {
-                match index {
-                    #(#first),*
-                }
-            }
-        }
-
-        impl FlavorAnsiColorPairs {
-            /// Get an ANSI color pair by name.
-            ///
-            /// This is equivalent to using the index operator, but can also be used in
-            /// const contexts.
-            #[must_use]
-            pub const fn get_ansi_color_pair(&self, name: AnsiColorPairName) -> &AnsiColorPair {
-                match name {
-                    #(#second),*
-                }
+                self.get_ansi_color_pair(index)
             }
         }
     }

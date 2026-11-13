@@ -232,36 +232,6 @@ pub struct AnsiColorPairsIterator<'a> {
 }
 
 impl Palette {
-    /// Get an array of the flavors in the palette.
-    #[must_use]
-    pub const fn all_flavors(&self) -> [&Flavor; 4] {
-        [&self.latte, &self.frappe, &self.macchiato, &self.mocha]
-    }
-
-    /// Create an iterator over the flavors in the palette.
-    #[must_use]
-    pub const fn iter(&self) -> FlavorIterator<'_> {
-        FlavorIterator {
-            current: 0,
-            phantom: PhantomData,
-        }
-    }
-}
-
-impl Index<FlavorName> for Palette {
-    type Output = Flavor;
-
-    fn index(&self, index: FlavorName) -> &Self::Output {
-        match index {
-            FlavorName::Latte => &self.latte,
-            FlavorName::Frappe => &self.frappe,
-            FlavorName::Macchiato => &self.macchiato,
-            FlavorName::Mocha => &self.mocha,
-        }
-    }
-}
-
-impl Palette {
     /// Get a flavor by name.
     ///
     /// This is equivalent to using the index operator, but can also be used in
@@ -274,6 +244,29 @@ impl Palette {
             FlavorName::Macchiato => &self.macchiato,
             FlavorName::Mocha => &self.mocha,
         }
+    }
+
+    /// Create an iterator over the flavors in the palette.
+    #[must_use]
+    pub const fn iter(&self) -> FlavorIterator<'_> {
+        FlavorIterator {
+            current: 0,
+            phantom: PhantomData,
+        }
+    }
+
+    /// Get an array of the flavors in the palette.
+    #[must_use]
+    pub const fn all_flavors(&self) -> [&Flavor; 4] {
+        [&self.latte, &self.frappe, &self.macchiato, &self.mocha]
+    }
+}
+
+impl Index<FlavorName> for Palette {
+    type Output = Flavor;
+
+    fn index(&self, index: FlavorName) -> &Self::Output {
+        self.get_flavor(index)
     }
 }
 
@@ -379,45 +372,6 @@ impl FlavorName {
     }
 }
 
-impl FlavorColors {
-    /// Create an iterator over the colors in the flavor.
-    #[must_use]
-    pub const fn iter(&self) -> ColorIterator<'_> {
-        ColorIterator {
-            colors: self,
-            current: 0,
-        }
-    }
-}
-
-impl FlavorAnsiColors {
-    /// Create an iterator over the ANSI colors in the flavor.
-    #[must_use]
-    pub const fn iter(&self) -> AnsiColorIterator<'_> {
-        AnsiColorIterator {
-            ansi_colors: self,
-            current: 0,
-        }
-    }
-
-    /// Get the ANSI color pairs
-    #[must_use]
-    pub const fn all_pairs(&self) -> FlavorAnsiColorPairs {
-        self.to_ansi_color_pairs()
-    }
-}
-
-impl FlavorAnsiColorPairs {
-    /// Create an iterator over the ANSI color pairs in the flavor.
-    #[must_use]
-    pub const fn iter(&self) -> AnsiColorPairsIterator<'_> {
-        AnsiColorPairsIterator {
-            ansi_color_pairs: self,
-            current: 0,
-        }
-    }
-}
-
 impl<'a> Iterator for FlavorIterator<'a> {
     type Item = &'a Flavor;
 
@@ -511,6 +465,15 @@ impl<'a> IntoIterator for &'a FlavorAnsiColorPairs {
 }
 
 impl Flavor {
+    /// Get a color by name.
+    ///
+    /// This is equivalent to using the index operator, but can also be used in
+    /// const contexts.
+    #[must_use]
+    pub const fn get_color(&self, name: ColorName) -> &Color {
+        self.colors.get_color(name)
+    }
+
     /// Create an iterator over the colors in the flavor.
     #[must_use]
     pub const fn iter(&self) -> ColorIterator<'_> {
@@ -547,18 +510,7 @@ impl Index<ColorName> for Flavor {
     type Output = Color;
 
     fn index(&self, index: ColorName) -> &Self::Output {
-        self.colors.index(index)
-    }
-}
-
-impl Flavor {
-    /// Get a color by name.
-    ///
-    /// This is equivalent to using the index operator, but can also be used in
-    /// const contexts.
-    #[must_use]
-    pub const fn get_color(&self, name: ColorName) -> &Color {
-        self.colors.get_color(name)
+        self.get_color(index)
     }
 }
 
@@ -567,6 +519,34 @@ impl Color {
     #[must_use]
     pub const fn identifier(&self) -> &'static str {
         self.name.identifier()
+    }
+
+    /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+    #[cfg(feature = "ansi-term")]
+    pub fn ansi_paint<'a, I, S: 'a + alloc::borrow::ToOwned + ?Sized>(
+        &self,
+        input: I,
+    ) -> ::ansi_term::ANSIGenericString<'a, S>
+    where
+        I: Into<alloc::borrow::Cow<'a, S>>,
+        <S as alloc::borrow::ToOwned>::Owned: core::fmt::Debug,
+    {
+        ::ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
+    }
+}
+
+impl AnsiColor {
+    /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
+    #[cfg(feature = "ansi-term")]
+    pub fn ansi_paint<'a, I, S: 'a + alloc::borrow::ToOwned + ?Sized>(
+        &self,
+        input: I,
+    ) -> ::ansi_term::ANSIGenericString<'a, S>
+    where
+        I: Into<alloc::borrow::Cow<'a, S>>,
+        <S as alloc::borrow::ToOwned>::Owned: core::fmt::Debug,
+    {
+        ::ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
     }
 }
 
@@ -591,40 +571,6 @@ impl From<(f64, f64, f64)> for Hsl {
 impl From<(f64, f64, f64)> for Oklch {
     fn from((l, c, h): (f64, f64, f64)) -> Self {
         Self { l, c, h }
-    }
-}
-
-#[cfg(feature = "ansi-term")]
-mod ansi_term {
-    use crate::{AnsiColor, Color};
-    use alloc::borrow::ToOwned;
-
-    impl Color {
-        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
-        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
-            &self,
-            input: I,
-        ) -> ansi_term::ANSIGenericString<'a, S>
-        where
-            I: Into<alloc::borrow::Cow<'a, S>>,
-            <S as ToOwned>::Owned: core::fmt::Debug,
-        {
-            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
-        }
-    }
-
-    impl AnsiColor {
-        /// Paints the given input with a color à la [ansi_term](https://docs.rs/ansi_term/latest/ansi_term/)
-        pub fn ansi_paint<'a, I, S: 'a + ToOwned + ?Sized>(
-            &self,
-            input: I,
-        ) -> ansi_term::ANSIGenericString<'a, S>
-        where
-            I: Into<alloc::borrow::Cow<'a, S>>,
-            <S as ToOwned>::Owned: core::fmt::Debug,
-        {
-            ansi_term::Color::RGB(self.rgb.r, self.rgb.g, self.rgb.b).paint(input)
-        }
     }
 }
 
