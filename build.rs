@@ -211,8 +211,8 @@ fn ansi_color_pairs_in_order(
 fn ansi_colors_in_order(flavor: &Flavor) -> std::vec::IntoIter<(String, &AnsiColor)> {
     flavor
         .ansi_colors
-        .iter()
-        .flat_map(|(_, c)| [&c.normal, &c.bright])
+        .values()
+        .flat_map(|c| [&c.normal, &c.bright])
         .map(|c| (c.name.to_lowercase().replace(' ', "_"), c))
         .sorted_by(|(_, a), (_, b)| a.code.cmp(&b.code))
 }

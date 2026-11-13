@@ -698,25 +698,25 @@ mod css_colors {
 mod iced {
     use crate::{AnsiColor, Color};
 
-    impl From<Color> for iced::Color {
+    impl From<Color> for iced_core::Color {
         fn from(value: Color) -> Self {
             Self::from_rgb8(value.rgb.r, value.rgb.g, value.rgb.b)
         }
     }
 
-    impl From<Color> for iced::Background {
+    impl From<Color> for iced_core::Background {
         fn from(value: Color) -> Self {
             Self::Color(value.into())
         }
     }
 
-    impl From<AnsiColor> for iced::Color {
+    impl From<AnsiColor> for iced_core::Color {
         fn from(value: AnsiColor) -> Self {
             Self::from_rgb8(value.rgb.r, value.rgb.g, value.rgb.b)
         }
     }
 
-    impl From<AnsiColor> for iced::Background {
+    impl From<AnsiColor> for iced_core::Background {
         fn from(value: AnsiColor) -> Self {
             Self::Color(value.into())
         }
