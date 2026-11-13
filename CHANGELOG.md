@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0](https://github.com/catppuccin/rust/compare/v2.8.0...v2.9.0) - 2026-11-13
+
+### Added
+
+- upgrade deps, switch to iced_core, fix all-features build
+
+### Other
+
+- upgrade deps, fix release-plz workflow
+
 ## [2.8.0](https://github.com/catppuccin/rust/compare/v2.7.0...v2.8.0) - 2026-04-26
 
 ### Added
