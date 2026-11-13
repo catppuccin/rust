@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0](https://github.com/catppuccin/rust/compare/v2.8.0...v2.9.0) - 2026-11-13
+
+### Added
+
+- upgrade deps, switch to iced_core, fix all-features build
+  - bevy has been updated from 0.18 to 0.20. conversions to bevy types will require you to be on bevy 0.20 too. see [#76](https://github.com/catppuccin/rust/issues/76) for more details.
+
+### Other
+
+- upgrade deps, fix release-plz workflow
+
 ## [2.8.0](https://github.com/catppuccin/rust/compare/v2.7.0...v2.8.0) - 2026-04-26
 
 ### Added
